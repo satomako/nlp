@@ -51,22 +51,26 @@
 /*
  * string option
  */
-#define NLP_STRING_MASK            (240)
 #define NLP_STRING_TOUPPER         (16)
 #define NLP_STRING_TOLOWER         (32)
 #define NLP_STRING_PAD_SPACE       (64)
 #define NLP_STRING_PAD_NULL        (128)
+#define NLP_STRING_PAD_MASK        (192)
 
-#include <stdint.h>
 
-#define __int4 int32_t
-#define __int8 int64_t
-#define __real4 float
-#define __real8 double
 
 #ifdef _MSC_VER
 #define strncasecmp _strnicmp
 #define strcasecmp _stricmp
 #endif
+
+#include <stdint.h>
+#define __int4 int32_t
+/*
+#define __int8 int64_t
+*/
+
+#define __real4 float
+#define __real8 double
 
 #endif /*_NLP_DEFINE_H_*/

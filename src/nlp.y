@@ -85,9 +85,11 @@ addr_list		: INTEGER
 				printf("YACC:addr_list.CM INTEGER: %s\n", yytext);
 #endif
 				nlp_incr_addr_dimension();
-				if (nlp_get_addr_dimension() >= NLP_MAX_DIMENSION) {
+				if (nlp_get_addr_dimension() > NLP_MAX_DIMENSION) {
+					nlp_log("ERROR: max address dimension exceeds\n");
+/*FIXME*/
 #ifdef __DEBUG_YACC__
-					printf("YACC:warning addr_dimension=%d\n", nlp_get_addr_dimension());
+					printf("YACC:addr_dimension=%d\n", nlp_get_addr_dimension());
 #endif
 				} else {
 					nlp_set_addr(nlp_get_addr_dimension(), atoi(yytext));

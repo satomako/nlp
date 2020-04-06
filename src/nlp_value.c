@@ -17,9 +17,8 @@
 #include "nlp_value.h"
 #include "nlp_variable.h"
 #include "nlp_util.h"
+#include "nlp_log.h"
 
-/* private global */
-static FILE *_log;
 
 /* module */
 typedef struct YYLTYPE
@@ -34,19 +33,13 @@ static struct nlp_value_t nlp_value_head;
 static struct nlp_value_t nlp_decode_head;
 static int nlp_decode_stack_pointer;
 static struct nlp_decode_stack_t nlp_decode_stack[NLP_VALUE_NEST_MAX];
+static struct nlp_value_t *current_decode_varname;
+
 extern int yylineno;
 extern YYLTYPE yylloc;
 
 
 static char *nlp_valtype_str[] = {"NULL", "ID", "INTEGER", "REAL", "STRING", "MULTIPLY", "LP", "RP", "SKIPPER"};
-
-/*
- */
-void nlp_value_set_logfile(FILE *logfile)
-{
-	_log = logfile;
-}
-
 
 
 /*
@@ -416,8 +409,9 @@ fprintf(stderr, "ip[%d] = %d (%s)\n", index, (int)atof(value->value), value->val
 		break;
 
 	case NLP_VARTYPE_FIXCHAR:
-		sp = value->value;
-		
+		sp = variable->p;
+		sp += index * variable->value_length;
+		t_strlcpy_fix(sp, value->value, variable->value_length, variable->option);
 		break;
 
 	case NLP_VARTYPE_STRING:
@@ -456,10 +450,33 @@ int nlp_value_decode_get_start_address(struct nlp_variable_t *variable, int star
 	int dim;
 	int start_dim;
 	int i;
+	int index;
 
 	dim = nlp_get_addr_dimension();
+	if (dim > variable->dimension) {
+		nlp_log("ERROR: dimension exceeds. variable name [%s] in line no %d column %d\n"
+			"       declared [%d]\n"
+			"       input [%d]\n",
+			current_decode_varname->value,
+			current_decode_varname->first_line,
+			current_decode_varname->first_column,
+			variable->dimension,
+			dim);
+		return 1;
+	}
+
+	start_dim = variable->dimension - dim;
+	for (i = 0; i < start_dim; i++) {
+		start_address[i] = variable->dimension_range_minimum[i];
+	}
+	index = 1;
+	for (i = start_dim; i < variable->dimension; i++) {
+		start_address[i] = nlp_get_addr(index++);
+	}
+	return 0;
+
+/*
 	if (dim > NLP_MAX_DIMENSION) {
-/*FIXME*/
 	}
 	if (dim == 0) {
 		for (i = 0; i < variable->dimension; i++) {
@@ -478,6 +495,7 @@ int nlp_value_decode_get_start_address(struct nlp_variable_t *variable, int star
 		start_address[start_dim + i] = nlp_get_addr(i + 1);
 	}
 	return 0;
+*/
 }
 
 
@@ -490,7 +508,6 @@ int nlp_value_decode_get_start_address(struct nlp_variable_t *variable, int star
  */
 int nlp_value_decode()
 {
-	struct nlp_value_t *varname;
 	struct nlp_variable_t *var;
 	struct nlp_value_t *c;
 	struct nlp_value_t *p;
@@ -501,18 +518,23 @@ int nlp_value_decode()
 	int i;
 	int j;
 
-	varname = nlp_value_head.next;
-	nlp_value_remove(varname);
+	current_decode_varname = nlp_value_head.next;
+	nlp_value_remove(current_decode_varname);
 
-	var = nlp_variable_search(varname->value);
+	var = nlp_variable_search(current_decode_varname->value);
 	if (var == NULL) {
 		nlp_log("ERROR: invalid variable found [%s]. in line no %d column %d\n",
-			varname->value,
-			varname->first_line,
-			varname->first_column);
+			current_decode_varname->value,
+			current_decode_varname->first_line,
+			current_decode_varname->first_column);
+		nlp_value_free(current_decode_varname);
 		return 1;
 	}
-	nlp_value_decode_get_start_address(var, cdst);
+
+	if (nlp_value_decode_get_start_address(var, cdst) == 1) {
+		nlp_value_free(current_decode_varname);
+		return 1;
+	}
 	nlp_value_calc_index(var, cdst, &dst);
 
 	nlp_decode_head.next = nlp_value_head.next;
@@ -539,6 +561,7 @@ int nlp_value_decode()
 				i = (int)strlen(buf);
 				buf[i - 1] = '\0';
 				multiply = atoi(buf);
+/*FIXME CHECK ZERO*/
 			}
 		} else if (c->type == NLP_VALTYPE_LP) {
 			nlp_decode_stack_pointer++;
@@ -589,5 +612,6 @@ int nlp_value_decode()
 
 	}
 	nlp_value_list_free(&nlp_decode_head);
+	nlp_value_free(current_decode_varname);
 	return 0;
 }

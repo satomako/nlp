@@ -10,6 +10,7 @@
 #include "nlp_state.h"
 #include "nlp_variable.h"
 #include "nlp_value.h"
+#include "nlp_log.h"
 #include "nlp.h"
 
 /* YACC */

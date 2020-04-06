@@ -3,6 +3,8 @@
 #include <stdint.h>
 }
 
+%option never-interactive
+
 %{
 /* nlp.l
  * 2017-04-30
@@ -16,6 +18,7 @@
 #include "nlp_state.h"
 #include "nlp_variable.h"
 #include "nlp_value.h"
+#include "nlp_log.h"
 #include "nlp.tab.c"
 
 int yylineno;
