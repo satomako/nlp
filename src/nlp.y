@@ -16,154 +16,158 @@ int yylex();
 %token	BAD
 
 %%
-namelist		: HEAD list TAIL
-			{
-				YYACCEPT;
-			}
-			;
+namelist          : HEAD list TAIL
+                  {
+                    YYACCEPT;
+                  }
+                  ;
 
-list			: /* empty */
-			{
+list              : /* empty */
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:list.empty: %s\n", yytext);
+                    printf("YACC:list.empty: %s\n", yytext);
 #endif
-			}
-			| list let
-			{
+                  }
+                  | list let
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:list.list let: %s\n", yytext);
+                    printf("YACC:list.list let: %s\n", yytext);
 #endif
-			}
-			| error TERM {yyerrok; fprintf(stderr, "list\n"); yyclearin;}
-			;
-
-
-let			: var_name EQ val_list TERM
-			{
-#ifdef __DEBUG_YACC__
-				printf("YACC:let: %s\n", yytext);
-#endif
-				nlp_value_decode();
-			}
-			;
+                  }
+                  | error TERM {yyerrok; fprintf(stderr, "list\n"); yyclearin;}
+                  ;
 
 
-var_name		: IDENTIFIER
-			{
+let               : var_name EQ val_list TERM
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:var_name.IDENTIFIER: %s\n", yytext);
-				printf("YACC:lineno=%d\n", yylineno);
+                    printf("YACC:let: %s\n", yytext);
 #endif
-				nlp_set_addr_dimension(0);
-			}
-			| IDENTIFIER LP addr_list RP
-			{
-#ifdef __DEBUG_YACC__
-				printf("YACC:var_name.addr_list: %s\n", yytext);
-				printf("YACC:lineno=%d\n", yylineno);
-				for (nlp_yyint = 0; nlp_yyint < nlp_get_addr_dimension(); nlp_yyint++) {
-					if (nlp_yyint > NLP_MAX_DIMENSION - 1) break;
-					printf("YACC:dim=%d, %d ", nlp_yyint, nlp_get_addr(nlp_yyint + 1));
-				}
-				printf("\n");
-#endif
-			}
-			;
+                    nlp_value_decode();
+                  }
+                  ;
 
 
-addr_list		: INTEGER
-			{
+var_name          : IDENTIFIER
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:addr_list.INTEGER: %s\n", yytext);
+                    printf("YACC:var_name.IDENTIFIER: %s\n", yytext);
+                    printf("YACC:lineno=%d\n", yylineno);
 #endif
-				nlp_set_addr_dimension(1);
-				nlp_set_addr(nlp_get_addr_dimension(), atoi(yytext));
-			}
-			| addr_list CM INTEGER
-			{
+                    nlp_set_addr_dimension(0);
+                  }
+                  | IDENTIFIER LP addr_list RP
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:addr_list.CM INTEGER: %s\n", yytext);
+                    printf("YACC:var_name.addr_list: %s\n", yytext);
+                    printf("YACC:lineno=%d\n", yylineno);
+                    for (nlp_yyint = 0; nlp_yyint < nlp_get_addr_dimension(); nlp_yyint++)
+                    {
+                      if (nlp_yyint > NLP_MAX_DIMENSION - 1) break;
+                      printf("YACC:dim=%d, %d ", nlp_yyint, nlp_get_addr(nlp_yyint + 1));
+                    }
+                    printf("\n");
 #endif
-				nlp_incr_addr_dimension();
-				if (nlp_get_addr_dimension() > NLP_MAX_DIMENSION) {
-					nlp_log("ERROR: max address dimension exceeds\n");
+                  }
+                  ;
+
+
+addr_list         : INTEGER
+                  {
+#ifdef __DEBUG_YACC__
+                    printf("YACC:addr_list.INTEGER: %s\n", yytext);
+#endif
+                    nlp_set_addr_dimension(1);
+                    nlp_set_addr(nlp_get_addr_dimension(), atoi(yytext));
+                  }
+                  | addr_list CM INTEGER
+                  {
+#ifdef __DEBUG_YACC__
+                    printf("YACC:addr_list.CM INTEGER: %s\n", yytext);
+#endif
+                    nlp_incr_addr_dimension();
+                    if (nlp_get_addr_dimension() > NLP_MAX_DIMENSION)
+                    {
+                      nlp_log("ERROR: max address dimension exceeds\n");
 /*FIXME*/
 #ifdef __DEBUG_YACC__
-					printf("YACC:addr_dimension=%d\n", nlp_get_addr_dimension());
+                      printf("YACC:addr_dimension=%d\n", nlp_get_addr_dimension());
 #endif
-				} else {
-					nlp_set_addr(nlp_get_addr_dimension(), atoi(yytext));
-				}
-			}
-			;
+                    }
+                    else
+                    {
+                      nlp_set_addr(nlp_get_addr_dimension(), atoi(yytext));
+                    }
+                  }
+                  ;
 
 
-val_list		: scalar
-			| CM
-			| LP val_list RP
-			| multiplier LP val_list RP
-			| val_list scalar
-			| val_list CM
-			| val_list LP val_list RP
-			| val_list multiplier LP val_list RP
-			;
+val_list          : scalar
+                  | CM
+                  | LP val_list RP
+                  | multiplier LP val_list RP
+                  | val_list scalar
+                  | val_list CM
+                  | val_list LP val_list RP
+                  | val_list multiplier LP val_list RP
+                  ;
 
 
-scalar			: INTEGER
-			{
+scalar            : INTEGER
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:scalar.INTEGER: %s\n", yytext);
+                    printf("YACC:scalar.INTEGER: %s\n", yytext);
 #endif
-			}
-			| REAL
-			{
+                  }
+                  | REAL
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:scalar.REAL: %s\n", yytext);
+                    printf("YACC:scalar.REAL: %s\n", yytext);
 #endif
-			}
-			| STRING
-			{
+                  }
+                  | STRING
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:scalar.STRING: %s\n", nlp_get_string());
+                    printf("YACC:scalar.STRING: %s\n", nlp_get_string());
 #endif
-			}
-			| SKIPPER
-			{
+                  }
+                  | SKIPPER
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:scalar.SKIPPER: %s\n", yytext);
+                    printf("YACC:scalar.SKIPPER: %s\n", yytext);
 #endif
-			}
-			| multiplier INTEGER
-			{
+                  }
+                  | multiplier INTEGER
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:scalar.multiplier INTEGER: %s\n", yytext);
+                    printf("YACC:scalar.multiplier INTEGER: %s\n", yytext);
 #endif
-			}
-			| multiplier REAL
-			{
+                  }
+                  | multiplier REAL
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:scalar.multiplier REAL: %s\n", yytext);
+                    printf("YACC:scalar.multiplier REAL: %s\n", yytext);
 #endif
-			}
-			| multiplier STRING
-			{
+                  }
+                  | multiplier STRING
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:scalar.multiplier STRING: %s\n", nlp_get_string());
+                    printf("YACC:scalar.multiplier STRING: %s\n", nlp_get_string());
 #endif
-			}
-			;
+                  }
+                  ;
 
 
-multiplier		: NUMMUL
-			{
+multiplier        : NUMMUL
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:multiplier.NUMMUL: %s\n", yytext);
+                    printf("YACC:multiplier.NUMMUL: %s\n", yytext);
 #endif
-			}
-			| MULMUL
-			{
+                  }
+                  | MULMUL
+                  {
 #ifdef __DEBUG_YACC__
-				printf("YACC:multiplier.MULMUL: %s\n", yytext);
+                    printf("YACC:multiplier.MULMUL: %s\n", yytext);
 #endif
-			}
-			;
+                  }
+                  ;

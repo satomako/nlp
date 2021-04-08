@@ -7,6 +7,14 @@
 #include "nlp_define.h"
 #include "nlp_util.h"
 
+/*
+ * purpose:
+ * copy string
+ * arguments:
+ * char *dst ... distination
+ * char *src ... source
+ * int size ... size of distination
+ */
 char *t_strlcpy(char *dst, char *src, int size)
 {
 	char *dst_save = dst;
@@ -22,6 +30,16 @@ char *t_strlcpy(char *dst, char *src, int size)
 
 
 
+/*
+ * purpose:
+ * copy string (fixed length buffer)
+ * arguments:
+ * char *dst ... distination
+ * char *src ... source
+ * int size ... size of distination
+ * int opt ... option
+ *
+ */
 char *t_strlcpy_fix(char *dst, char *src, int size, int opt)
 {
 	char *dst_save = dst;

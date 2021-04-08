@@ -14,6 +14,8 @@
 #define NLP_STATE_IDENTIFIER       (4)
 #define NLP_STATE_ADDR             (5)
 #define NLP_STATE_VALUES           (6)
+#define NLP_STATE_END              (7)
+#define NLP_STATE_STOP             (8)
 
 #define NLP_MAX_DIMENSION          (8)
 #define NLP_MAX_STRING_LENGTH      (1024)
@@ -65,12 +67,10 @@
 #endif
 
 #include <stdint.h>
-#define __int4 int32_t
-/*
-#define __int8 int64_t
-*/
+#define _int32 int32_t
+#define _int64 int64_t
 
-#define __real4 float
-#define __real8 double
+#define _real32 float
+#define _real64 double
 
 #endif /*_NLP_DEFINE_H_*/
