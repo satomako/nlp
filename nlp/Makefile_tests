@@ -1,0 +1,26 @@
+TESTS      = variable_dump.exe
+
+CC         = gcc
+LD         = ld
+COPTS      = -O0 -g
+CFLAGS     = $(COPTS) -I../../include
+LDFLAGS    = $(COPTS)
+LIBS       = -L. -lnlp
+
+SRC        = ../../test
+OBJS       = variable_dump.o
+VPATH      = ../../test:../../include
+
+.SUFFIXES:
+.SUFFIXES: .c .o
+
+all: $(TESTS)
+
+variable_dump.exe: variable_dump.o libnlp.a
+	$(CC) -o $@ variable_dump.o $(LIBS)
+.c.o:
+	echo $<
+	$(CC) -c $(CFLAGS) $<
+
+clean:
+	 rm -f *.exe *.o
