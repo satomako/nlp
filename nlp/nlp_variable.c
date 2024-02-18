@@ -5,17 +5,25 @@
 #include "nlp.h"
 #define MAX_NEST (128)
 
+
+struct nlp_variable_t *nlp_create_variable_from_text(char *text)
+{
+    return NULL;
+}
+
+
 /**
  * @brief create new variable structure
  * @param[in] name variable name
  * @param[in] type variable type (NLP_TYPE_INT8/NLP_TYPE_INT32/)
  * @param[in] size variable size
+ * @param[in] padding padding size
  * @param[in] dim variable dimension
  * @param[in] min 
  * @param[in] max 
  * @return pointer of created variable, NULL at failed
 */
-struct nlp_variable_t * nlp_create_variable(char *name, int type, int size, int dim, int min[], int max[])
+struct nlp_variable_t *nlp_create_variable(char *name, int type, int size, int padding, int dim, int min[], int max[])
 {
     struct nlp_variable_t *v;
 
@@ -53,6 +61,8 @@ struct nlp_variable_t * nlp_create_variable(char *name, int type, int size, int 
         default:
             v->size = 0;
     }
+    v->padding = padding;
+    v->msize = v->size + padding;
     v->dim = dim;
     for (int i = 0; i < dim; i++)
     {
@@ -126,7 +136,14 @@ struct nlp_variable_t * nlp_clone_variable(struct nlp_variable_t *variable)
 
     while (1)
     {
-        if ((dst[sp] = nlp_create_variable(src[sp]->name, src[sp]->type, src[sp]->size, src[sp]->dim, src[sp]->min, src[sp]->max)) == NULL) return NULL;
+        if ((dst[sp] = nlp_create_variable(
+            src[sp]->name,
+            src[sp]->type,
+            src[sp]->size,
+            src[sp]->padding,
+            src[sp]->dim,
+            src[sp]->min,
+            src[sp]->max)) == NULL) return NULL;
         if (sp > 0)
         {
             nlp_add_member(dst[sp - 1], dst[sp]);
@@ -166,6 +183,9 @@ struct nlp_variable_t * nlp_clone_variable(struct nlp_variable_t *variable)
     return dst[0];
 }
 
+/**
+ * @brief 
+*/
 int nlp_dispose_variable(struct nlp_variable_t *variable)
 {
     struct nlp_variable_t *stack[MAX_NEST];
@@ -182,6 +202,9 @@ int nlp_dispose_variable(struct nlp_variable_t *variable)
 
 /**
  * @brief find variable
+ * @param valiable_list
+ * @param name
+ * @return
 */
 struct nlp_variable_t * nlp_find_variable(struct nlp_variable_list_t *variable_list, char *name)
 {
@@ -250,7 +273,7 @@ int nlp_calc_struct_size(struct nlp_variable_t *variable)
     {
         if (stack[sp]->type == NLP_TYPE_STRUCT)
         {
-            stack[sp]->size = 0;
+            stack[sp]->msize = 0;
             stack[sp + 1] = stack[sp]->member;
             sp++;
         }
@@ -261,7 +284,7 @@ int nlp_calc_struct_size(struct nlp_variable_t *variable)
             {
                 count = count * (stack[sp]->max[i] - stack[sp]->min[i] + 1);
             }
-            stack[sp - 1]->size += stack[sp]->size * count;
+            stack[sp - 1]->msize += stack[sp]->msize * count;
             if (stack[sp]->next != NULL)
             {
                 stack[sp] = stack[sp]->next;
@@ -276,7 +299,7 @@ int nlp_calc_struct_size(struct nlp_variable_t *variable)
                     {
                         count = count * (stack[sp]->max[i] - stack[sp]->min[i] + 1);
                     }
-                    stack[sp - 1]->size += stack[sp]->size * count;
+                    stack[sp - 1]->msize += stack[sp]->msize * count;
                     if (stack[sp]->next != NULL)
                     {
                         stack[sp] = stack[sp]->next;

@@ -3,5 +3,6 @@
 *.a
 *.lib
 *.exe
+*.out
 .vscode/
 build/

@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <ctype.h>
+#include <string.h>
 
 #include "nlp.h"
 
@@ -26,6 +27,26 @@ char *t_strlcpy(char *dst, char *src, int size)
 	}
 	*dst = '\0';
 	return dst_save;
+}
+
+/**
+ * @brief duplicate string
+ * @param src source
+ * @return duplicated string, NULL at failure
+*/
+char *t_strdup(char *src)
+{
+	int l;
+	char *p;
+
+	if (src == NULL) return NULL;
+	l = strlen(src) + 1;
+	p = malloc(l);
+	if (p != NULL)
+	{
+		t_strlcpy(p, src, l);
+	}
+	return p;
 }
 
 

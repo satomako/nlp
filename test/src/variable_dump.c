@@ -1,5 +1,4 @@
 #include <stdio.h>
-
 #include "nlp.h"
 
 void pnode(struct nlp_variable_t *);
@@ -15,28 +14,28 @@ int main(int ac, char *av[])
     min[0] = 0;
     max[0] = 1;
 /*
-    v = nlp_create_variable("hoge", NLP_TYPE_STRUCT, 0, 1, min, max);
-    member = nlp_create_variable("int32_member", NLP_TYPE_INT32, 0, 0, min, max);
+    v = nlp_create_variable("hoge", NLP_TYPE_STRUCT, 0, 0, 1, min, max);
+    member = nlp_create_variable("int32_member", NLP_TYPE_INT32, 0, 0, 0, min, max);
     nlp_add_member(v, member);
-    member = nlp_create_variable("real32_member", NLP_TYPE_REAL32, 0, 0, min, max);
+    member = nlp_create_variable("real32_member", NLP_TYPE_REAL32, 0, 0, 0, min, max);
     nlp_add_member(v, member);
-    v2 = nlp_create_variable("hoge_member", NLP_TYPE_STRUCT, 0, 0, min, max);
+    v2 = nlp_create_variable("hoge_member", NLP_TYPE_STRUCT, 0, 0, 0, min, max);
     nlp_add_member(v, v2);
-    member = nlp_create_variable("int64_member", NLP_TYPE_INT64, 0, 0, min, max);
+    member = nlp_create_variable("int64_member", NLP_TYPE_INT64, 0, 0, 0, min, max);
     nlp_add_member(v2, member);
-    v3 = nlp_create_variable("hoge_member_member", NLP_TYPE_STRUCT, 0, 0, min, max);
+    v3 = nlp_create_variable("hoge_member_member", NLP_TYPE_STRUCT, 0, 0, 0, min, max);
     nlp_add_member(v2, v3);
-    member = nlp_create_variable("real64_member", NLP_TYPE_REAL64, 0, 0, min, max);
+    member = nlp_create_variable("real64_member", NLP_TYPE_REAL64, 0, 0, 0, min, max);
     nlp_add_member(v3, member);
 */
-    v = nlp_create_variable("STR1", NLP_TYPE_STRUCT, 0, 1, min, max);
-    v2 = nlp_create_variable("STR2", NLP_TYPE_STRUCT, 0, 1, min, max);
+    v = nlp_create_variable("STR1", NLP_TYPE_STRUCT, 0, 0, 1, min, max);
+    v2 = nlp_create_variable("STR2", NLP_TYPE_STRUCT, 0, 0, 1, min, max);
     nlp_add_member(v, v2);
-    member = nlp_create_variable("real32_member", NLP_TYPE_REAL32, 0, 1, min, max);
+    member = nlp_create_variable("real32_member", NLP_TYPE_REAL32, 0, 0, 1, min, max);
     nlp_add_member(v2, member);
-    member = nlp_create_variable("int64_member", NLP_TYPE_INT64, 0, 1, min, max);
+    member = nlp_create_variable("int64_member", NLP_TYPE_INT64, 0, 0, 1, min, max);
     nlp_add_member(v2, member);
-    member = nlp_create_variable("real64_member", NLP_TYPE_REAL64, 0, 1, min, max);
+    member = nlp_create_variable("real64_member", NLP_TYPE_REAL64, 0, 0, 1, min, max);
     nlp_add_member(v, member);
 
     nlp_calc_struct_size(v);

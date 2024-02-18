@@ -1,4 +1,8 @@
-TESTS      = variable_dump.exe
+#TESTS      = test01.exe
+#TESTS      = variable_dump.exe
+#TESTS      = test_value_value_list.exe
+#TESTS      = test01.exe variable_dump.exe test_value_value_list.exe
+TESTS      = test01.exe test_value_value_list.exe
 
 CC         = gcc
 LD         = ld
@@ -7,17 +11,22 @@ CFLAGS     = $(COPTS) -I../../include
 LDFLAGS    = $(COPTS)
 LIBS       = -L. -lnlp
 
-SRC        = ../../test
-OBJS       = variable_dump.o
-VPATH      = ../../test:../../include
+VPATH      = ../../test/src:../../include
 
 .SUFFIXES:
 .SUFFIXES: .c .o
 
 all: $(TESTS)
 
+test01.exe: test01.o libnlp.a
+	$(CC) -o $@ test01.o $(LIBS)
+
 variable_dump.exe: variable_dump.o libnlp.a
 	$(CC) -o $@ variable_dump.o $(LIBS)
+
+test_value_value_list.exe: test_value_value_list.o libnlp.a
+	$(CC) -o $@ test_value_value_list.o $(LIBS)
+
 .c.o:
 	echo $<
 	$(CC) -c $(CFLAGS) $<

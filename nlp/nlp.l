@@ -4,12 +4,18 @@
 
 
 %{
-#include "nlp.tab.c"
+#include <stdio.h>
+#include <stdlib.h>
+#include <io.h>
 
 #define YY_NO_UNISTD_H
 int yylineno;
 int yycolumn;
 
+#include "nlp.tab.c"
+#include "nlp.h"
+
+static struct nlp_t *_wc;
 %}
 
 ND		[a-zA-Z_]
@@ -31,7 +37,6 @@ SM      ";"
 
 
 %%
-
 <NAMEL>\/ {
 #ifdef __DEBUG_LEX__
     printf("LEX:TAIL:<NAMEL>/  %s\n", yytext);
@@ -58,6 +63,14 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:IDENTIFIER:<NAMEL>{ND}{AD}*  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (nlp_add_value_list(_wc) != NLP_NOERR)
+        {
+        }
+        nlp_add_value(_wc, IDENTIFIER, yytext, &yylloc);
+    }
     BEGIN VNAME;
     return IDENTIFIER;
 }
@@ -66,6 +79,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:IDENTIFIER:<VNAME>{ND}{AD}*  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, IDENTIFIER, yytext, &yylloc);
+    }
     return IDENTIFIER;
 }
 
@@ -73,6 +91,12 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:EQ:<VNAME>=  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        _wc->value_state = NLP_VALUE_STATE_INIT;
+        nlp_add_value(_wc, EQ, yytext, &yylloc);
+    }
     BEGIN NAMEL;
     return EQ;
 }
@@ -81,6 +105,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:LP:<VNAME>(  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, LP, yytext, &yylloc);
+    }
     return LP;
 }
 
@@ -88,6 +117,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:RP:<VNAME>)  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, RP, yytext, &yylloc);
+    }
     return RP;
 }
 
@@ -95,6 +129,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:DOT:<NAMEL>.  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, DOT, yytext, &yylloc);
+    }
     return DOT;
 }
 
@@ -102,6 +141,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:LP:<NAMEL>(  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, LP, yytext, &yylloc);
+    }
     return LP;
 }
 
@@ -109,6 +153,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:RP:<NAMEL>)  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, RP, yytext, &yylloc);
+    }
     return RP;
 }
 
@@ -116,6 +165,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:INTEGER:<VNAME>{SN}?{DG}+  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, INTEGER, yytext, &yylloc);
+    }
     return INTEGER;
 }
 
@@ -123,6 +177,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:CM:<VNAME>,  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, CM, yytext, &yylloc);
+    }
     return CM;
 }
 
@@ -130,6 +189,11 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:CM:<NAMEL>,  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, CM, yytext, &yylloc);
+    }
     return CM;
 }
 
@@ -172,70 +236,155 @@ SM      ";"
     BEGIN NAMEL;
 }
 <COMMENT>. ;
+<NAMEL>\; {
+#ifdef __DEBUG_LEX__
+    printf("LEX:SM:<NAMEL>\\;  %s\n", yytext);
+#endif
+    return SM;
+}
 <NAMEL>{SN}?{DG}+ {
 #ifdef __DEBUG_LEX__
     printf("LEX:INTEGER:<NAMEL>{SN}?{DG}+  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, INTEGER, yytext, &yylloc);
+    }
     return INTEGER;
 }
 <NAMEL>{NM}{DG}*\* {
 #ifdef __DEBUG_LEX__
     printf("LEX:NUMMUL:<NAMEL>{NM}{DG}*\\*  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, NUMMUL, yytext, &yylloc);
+    }
     return NUMMUL;
 }
 <NAMEL>"**" {
 #ifdef __DEBUG_LEX__
     printf("LEX:MULMUL:<NAMEL>**  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, MULMUL, yytext, &yylloc);
+    }
     return MULMUL;
 }
 <NAMEL>{SN}?{DG}+{EP} {
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{DG}+{EP}  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, REAL, yytext, &yylloc);
+    }
     return REAL;
 }
 <NAMEL>{SN}?{FC}+ {
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC}+  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, REAL, yytext, &yylloc);
+    }
     return REAL;
 }
 <NAMEL>{SN}?{FC}+{EP} {
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC}+{EP}  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, REAL, yytext, &yylloc);
+    }
     return REAL;
 }
 <NAMEL>{SN}?{FC2}+ {
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC2}+  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, REAL, yytext, &yylloc);
+    }
     return REAL;
 }
 <NAMEL>{SN}?{FC2}+{EP} {
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC2}+{EP}  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, REAL, yytext, &yylloc);
+    }
     return REAL;
 }
 <NAMEL>@+ {
 #ifdef __DEBUG_LEX__
     printf("LEX:SKIPPER:<NAMEL>@+  %s\n", yytext);
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        nlp_add_value(_wc, SKIPPER, yytext, &yylloc);
+    }
     return SKIPPER;
 }
 <NAMEL>\" {
+    nlp_string_reset(_wc);
     BEGIN DSTR;
 }
 <NAMEL>' {
+    nlp_string_reset(_wc);
     BEGIN SSTR;
 }
 <DSTR>\" {
 #ifdef __DEBUG_LEX__
     printf("LEX:STRING:<DSTR>\n");
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, STRING, _wc->scanning_string, &yylloc);
+    }
     BEGIN NAMEL;
     return STRING;
 }
@@ -243,12 +392,30 @@ SM      ";"
 #ifdef __DEBUG_LEX__
     printf("LEX:STRING:<SSTR>\n");
 #endif
+    _wc = nlp_get_current_context();
+    if (!_wc->opt_dryrun)
+    {
+        if (_wc->value_state == NLP_VALUE_STATE_INIT)
+        {
+        }
+        nlp_add_value(_wc, STRING, _wc->scanning_string, &yylloc);
+    }
     BEGIN NAMEL;
     return STRING;
 }
 <DSTR>. {
+    _wc = nlp_get_current_context();
+    if (nlp_string_append(_wc, yytext[0]))
+    {
+
+    }
 }
 <SSTR>. {
+    _wc = nlp_get_current_context();
+    if (nlp_string_append(_wc, yytext[0]))
+    {
+        
+    }
 }
 
 %%

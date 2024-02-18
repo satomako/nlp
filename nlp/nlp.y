@@ -1,6 +1,8 @@
 %{
-#define YYLEX_PARAM &yylval, &yylloc
-//int yylex();
+#include <stdio.h>
+#include "nlp.h"
+//#define YYLEX_PARAM &yylval, &yylloc
+extern char *yytext;
 %}
 
 %locations
