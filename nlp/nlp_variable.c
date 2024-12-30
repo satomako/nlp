@@ -3,8 +3,6 @@
 #include <string.h>
 
 #include "nlp.h"
-#define MAX_NEST (128)
-
 
 struct nlp_variable_t *nlp_create_variable_from_text(char *text)
 {
@@ -56,7 +54,7 @@ struct nlp_variable_t *nlp_create_variable(char *name, int type, int size, int p
             v->size = 8;
             break;
         case NLP_TYPE_STRUCT:
-            v->size = size;
+            v->size = 0;
             break;
         default:
             v->size = 0;
@@ -68,6 +66,7 @@ struct nlp_variable_t *nlp_create_variable(char *name, int type, int size, int p
     {
         v->min[i] = min[i];
         v->max[i] = max[i];
+        v->cur[i] = min[i];
     }
     return v;
 }
@@ -106,7 +105,7 @@ int nlp_add_member(struct nlp_variable_t *variable, struct nlp_variable_t *membe
 /**
  * @brief
 */
-struct nlp_variable_t * nlp_find_member(struct nlp_variable_t *variable, char *name)
+struct nlp_variable_t *nlp_find_member(struct nlp_variable_t *variable, char *name)
 {
     struct nlp_variable_t *v;
 
@@ -124,10 +123,10 @@ struct nlp_variable_t * nlp_find_member(struct nlp_variable_t *variable, char *n
 /**
  * @brief
 */
-struct nlp_variable_t * nlp_clone_variable(struct nlp_variable_t *variable)
+struct nlp_variable_t *nlp_clone_variable(struct nlp_variable_t *variable)
 {
-    struct nlp_variable_t *src[MAX_NEST];
-    struct nlp_variable_t *dst[MAX_NEST];
+    struct nlp_variable_t *src[NLP_MAX_MEMBER_DEPTH];
+    struct nlp_variable_t *dst[NLP_MAX_MEMBER_DEPTH];
     int sp;
 
     if (variable == NULL) return NULL;
@@ -144,6 +143,7 @@ struct nlp_variable_t * nlp_clone_variable(struct nlp_variable_t *variable)
             src[sp]->dim,
             src[sp]->min,
             src[sp]->max)) == NULL) return NULL;
+        dst[sp]->msize = src[sp]->msize;
         if (sp > 0)
         {
             nlp_add_member(dst[sp - 1], dst[sp]);
@@ -179,6 +179,10 @@ struct nlp_variable_t * nlp_clone_variable(struct nlp_variable_t *variable)
                 }
             }
         }
+        else
+        {
+            break;
+        }
     }
     return dst[0];
 }
@@ -188,7 +192,7 @@ struct nlp_variable_t * nlp_clone_variable(struct nlp_variable_t *variable)
 */
 int nlp_dispose_variable(struct nlp_variable_t *variable)
 {
-    struct nlp_variable_t *stack[MAX_NEST];
+    struct nlp_variable_t *stack[NLP_MAX_MEMBER_DEPTH];
     int sp;
 
     if (variable == NULL)
@@ -254,70 +258,51 @@ int nlp_append_variable_list(struct nlp_variable_list_t *variable_list, struct n
     vl->prev = variable_list->prev;
     variable_list->prev->next = vl;
     variable_list->prev = vl;
+    vl->v = variable;
 
     return NLP_NOERR;
 }
 
-int nlp_calc_struct_size(struct nlp_variable_t *variable)
+
+/**
+ * 
+*/
+int nlp_calc_struct_size(struct nlp_variable_t *variable, struct nlp_variable_t *stack[], int sp)
 {
-    struct nlp_variable_t *stack[MAX_NEST];
-    int sp;
     int count;
     int i;
+    int ret;
 
     if (variable == NULL) return NLP_ERR_NULL_POINTER;
-    sp = 0;
     stack[sp] = variable;
 
     while (1)
     {
         if (stack[sp]->type == NLP_TYPE_STRUCT)
         {
-            stack[sp]->msize = 0;
-            stack[sp + 1] = stack[sp]->member;
-            sp++;
+            stack[sp]->size = 0;
+            ret = nlp_calc_struct_size(stack[sp]->member, stack, sp + 1);
+            if (ret != NLP_NOERR) return ret;
         }
-        else if (sp > 0)
+
+        count = 1;
+        for (i = 0; i < stack[sp]->dim; i++)
         {
-            count = 1;
-            for (i = 0; i < stack[sp]->dim; i++)
-            {
-                count = count * (stack[sp]->max[i] - stack[sp]->min[i] + 1);
-            }
-            stack[sp - 1]->msize += stack[sp]->msize * count;
-            if (stack[sp]->next != NULL)
-            {
-                stack[sp] = stack[sp]->next;
-            }
-            else
-            {
-                sp--;
-                if (sp > 0)
-                {
-                    count = 1;
-                    for (i = 0; i < stack[sp]->dim; i++)
-                    {
-                        count = count * (stack[sp]->max[i] - stack[sp]->min[i] + 1);
-                    }
-                    stack[sp - 1]->msize += stack[sp]->msize * count;
-                    if (stack[sp]->next != NULL)
-                    {
-                        stack[sp] = stack[sp]->next;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    break;
-                }
-            }
+            count = count * (stack[sp]->max[i] - stack[sp]->min[i] + 1);
         }
+        stack[sp]->msize = (stack[sp]->size + stack[sp]->padding) * count;
+
+        if (sp > 0)
+        {
+            stack[sp - 1]->size += stack[sp]->msize;
+        }
+        if (stack[sp]->next == NULL) break;
+        stack[sp] = stack[sp]->next;
     }
+
     return NLP_NOERR;
 }
+
 
 void *nlp_current_pointer();
 

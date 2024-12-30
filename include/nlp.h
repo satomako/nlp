@@ -3,7 +3,10 @@
 
 #define NLP_MAX_IDENTIFIER_LEN   (127)
 #define NLP_MAX_DIMENSION        (8)
-#define NLP_MAX_STRING_LENGTH    (524288)
+#define NLP_MAX_MEMBER_DEPTH     (32)
+#define NLP_MAX_VALUE_NEST       (32)
+#define NLP_MAX_STRING_LENGTH    (65536)
+#define NLP_BUFFER_SIZE          (1024)
 
 #define NLP_NOERR                (0)
 #define NLP_ERR_NULL_POINTER     (1)
@@ -27,6 +30,12 @@
 
 #define NLP_VALUE_STATE_INIT       (0)
 #define NLP_VALUE_STATE_IDENTIFIER (1)
+
+#define NLP_DECODE_STATE_VALUE   (0)
+#define NLP_DECODE_STATE_COMMA   (1)
+
+#define NLP_FALSE                (0)
+#define NLP_TRUE                 (1)
 
 #if ! defined YYLTYPE_IS_DECLARED
 typedef struct YYLTYPE YYLTYPE;
@@ -91,10 +100,14 @@ struct nlp_decode_variable_t
     struct nlp_variable_t *variable;
     struct nlp_value_t *value_list;
     int value_sp;
-    struct nlp_value_t *value_stack[128];
+    struct nlp_value_t *value_stack[NLP_MAX_VALUE_NEST];
+    int value_multiply[NLP_MAX_VALUE_NEST];
+    int comma_state[NLP_MAX_VALUE_NEST];
     int variable_sp;
-    struct nlp_variable_t *variable_stack[128];
+    struct nlp_variable_t *variable_stack[NLP_MAX_MEMBER_DEPTH];
     struct nlp_variable_t *current;
+    int exceed;
+    int decode_state;
     void *p;
 };
 
@@ -118,6 +131,10 @@ int nlp_init(struct nlp_t *c);
 int nlp_set_dryrun(struct nlp_t *c, int option);
 struct nlp_t *nlp_get_current_context();
 int nlp_decode(struct nlp_t *c);
+int nlp_decode_one_variable(struct nlp_t *c, struct nlp_variable_t *var, struct nlp_value_list_t *vl);
+int nlp_decode_set_start_address(struct nlp_t *c, struct nlp_variable_t *var, struct nlp_value_t **val);
+int nlp_decode_dimension(struct nlp_decode_variable_t *dc, struct nlp_value_t **val);
+int nlp_decode_values(struct nlp_decode_variable_t *dc, struct nlp_value_t *val);
 
 /* 
  * nlp_variable.c
@@ -127,7 +144,7 @@ int nlp_dispose_variable(struct nlp_variable_t *variable);
 int nlp_add_member(struct nlp_variable_t *variable, struct nlp_variable_t *member);
 struct nlp_variable_t *nlp_find_member(struct nlp_variable_t *variable, char *name);
 struct nlp_variable_t *nlp_clone_variable(struct nlp_variable_t *variable);
-int nlp_calc_struct_size(struct nlp_variable_t *variable);
+int nlp_calc_struct_size(struct nlp_variable_t *variable, struct nlp_variable_t *stack[], int sp);
 int nlp_add_variable(struct nlp_variable_list_t *variable_list, struct nlp_variable_t *variable);
 struct nlp_variable_t *nlp_find_variable(struct nlp_variable_list_t *variable_list, char *name);
 int nlp_append_variable_list(struct nlp_variable_list_t *variable_list, struct nlp_variable_t *variable);

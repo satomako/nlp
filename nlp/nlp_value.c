@@ -130,12 +130,10 @@ int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE *yyl)
 
     v->value = t_strdup(value);
     if (v->value == NULL) return NLP_ERR_BAD_STATUS;
+    v->type = vtype;
     v->first_line = yyl->first_line;
     v->first_column = yyl->first_column;
-
     i->next = v;
-
-printf("value = %s\n", value);
     return NLP_NOERR;
 }
 

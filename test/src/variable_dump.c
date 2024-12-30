@@ -7,9 +7,11 @@ int main(int ac, char *av[])
 {
     struct nlp_variable_t *v, *v2, *v3;
     struct nlp_variable_t *member;
+    struct nlp_variable_t *stack[NLP_MAX_MEMBER_DEPTH];
     struct nlp_decode_variable_t d;
     int min[NLP_MAX_DIMENSION];
     int max[NLP_MAX_DIMENSION];
+    int sp;
 
     min[0] = 0;
     max[0] = 1;
@@ -37,13 +39,11 @@ int main(int ac, char *av[])
     nlp_add_member(v2, member);
     member = nlp_create_variable("real64_member", NLP_TYPE_REAL64, 0, 0, 1, min, max);
     nlp_add_member(v, member);
-
-    nlp_calc_struct_size(v);
-
+    sp = 0;
+    nlp_calc_struct_size(v, stack, sp);
     pnode(v);
 
     v2 = nlp_clone_variable(v);
-
     pnode(v2);
 
     d.variable = v;
@@ -72,7 +72,7 @@ void pnode(struct nlp_variable_t *v)
         }
         printf(")");
     }
-    printf(" %d\n", v->size);
+    printf(" size:%d msize:%d\n", v->size, v->msize);
     if (v->type == NLP_TYPE_STRUCT)
     {
         struct nlp_variable_t *member;

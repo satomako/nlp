@@ -90,7 +90,7 @@ addr.list           : INTEGER
                     }
                     ;
 
-value.list          : scalar
+/* value.list          : scalar
                     {
 #ifdef __DEBUG_YACC__
                         printf("YACC:value.list scalar: %s\n", yytext);
@@ -100,6 +100,18 @@ value.list          : scalar
                     {
 #ifdef __DEBUG_YACC__
                         printf("YACC:value.list CM: %s\n", yytext);
+#endif
+                    }
+                    | LP value.list RP
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:value.list LP value.list RP: %s\n", yytext);
+#endif
+                    }
+                    | multiplier LP value.list RP
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:value.list multiplier LP value.list RP: %s\n", yytext);
 #endif
                     }
                     | value.list scalar
@@ -114,6 +126,37 @@ value.list          : scalar
                         printf("YACC:value.list value.list CM: %s\n", yytext);
 #endif
                     }
+                    | value.list LP value.list RP
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:value.list value.list LP value.list RP: %s\n", yytext);
+#endif
+                    }
+                    | value.list multiplier LP value.list RP
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:value.list multiplier LP value.list RP: %s\n", yytext);
+#endif
+                    }
+                    ; */
+
+value.list          : value.elements
+                    | LP value.elements RP
+                    | multiplier LP value.elements RP
+                    | value.list LP value.elements RP
+                    | value.list multiplier LP value.elements RP
+                    ;
+
+value.elements      : value.element
+                    | CM
+                    | SKIPPER
+                    | value.elements value.element
+                    | value.elements CM
+                    | value.elements SKIPPER
+                    ;
+
+value.element       : scalar
+                    | multiplier scalar
                     ;
 
 scalar              : INTEGER
@@ -122,5 +165,30 @@ scalar              : INTEGER
                         printf("YACC:scalar INTEGER: %s\n", yytext);
 #endif
                     }
+                    | REAL
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:scalar REAL: %s\n", yytext);
+#endif
+                    }
+                    | STRING
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:scalar STRING: %s\n", yytext);
+#endif
+                    }
                     ;
 
+multiplier          : NUMMUL
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:multiplier NUMMUL: %s\n", yytext);
+#endif
+                    }
+                    | MULMUL
+                    {
+#ifdef __DEBUG_YACC__
+                        printf("YACC:multiplier MULMUL: %s\n", yytext);
+#endif
+                    }
+                    ;

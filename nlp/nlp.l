@@ -236,9 +236,9 @@ SM      ";"
     BEGIN NAMEL;
 }
 <COMMENT>. ;
-<NAMEL>\; {
+<NAMEL>\;; {
 #ifdef __DEBUG_LEX__
-    printf("LEX:SM:<NAMEL>\\;  %s\n", yytext);
+    printf("LEX:SM:<NAMEL>;  %s\n", yytext);
 #endif
     return SM;
 }
