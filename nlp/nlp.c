@@ -1,3 +1,7 @@
+/*
+* nlp.c
+* This file is part of nlp.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,8 +18,6 @@ char* _nlp_type_to_string(int type);
 */
 static struct nlp_t *_cc;
 
-void yyerror(const char *);
-
 int yywrap()
 {
 	return 1;
@@ -25,6 +27,10 @@ void yyerror(const char *str)
 {
 }
 
+/**
+ * @brief initialize nlp context
+ * @param[in] c pointer of nlp context
+ */
 int nlp_init(struct nlp_t *c)
 {
     memset(c, 0, sizeof(struct nlp_t));
@@ -44,16 +50,45 @@ int nlp_set_dryrun(struct nlp_t *c, int option)
     return NLP_NOERR;
 }
 
+/**
+ * @brief get current context
+ * @return pointer of current context
+ */
 struct nlp_t *nlp_get_current_context()
 {
     return _cc;
 }
 
+/**
+ * @brief set current context
+ * @param[in] c pointer of nlp context
+ */
 void nlp_set_current_context(struct nlp_t *c)
 {
     _cc = c;
 }
 
+/**
+ * @brief decode
+ * @param[in] c pointer of nlp context
+ * @return error code
+ * @retval NLP_NOERR success
+ * @retval NLP_ERR_BAD_ARGUMENT bad argument
+ * @retval NLP_ERR_NOMEM no memory
+ * @retval NLP_ERR_BAD_STATUS bad status
+ * @retval NLP_ERR_BAD_TYPE bad type
+ * @retval NLP_ERR_BAD_VALUE bad value
+ * @retval NLP_ERR_BAD_MEMBER bad member
+ * @retval NLP_ERR_MEMBER_EXISTS member exists
+ * @retval NLP_ERR_NULL_POINTER null pointer
+ * @retval NLP_ERR_BAD_DIMENSION bad dimension
+ * @retval NLP_ERR_BAD_LENGTH bad length
+ * @retval NLP_ERR_BAD_SIZE bad size
+ * @retval NLP_ERR_BAD_LEVEL bad level
+ * @retval NLP_ERR_BAD_STATUS bad status
+ * @retval NLP_ERR_BAD_TYPE bad type
+ * @retval NLP_ERR_BAD_VALUE bad value
+ */
 int nlp_decode(struct nlp_t *c)
 {
     struct nlp_value_list_t *vl;
@@ -78,6 +113,15 @@ int nlp_decode(struct nlp_t *c)
     return NLP_NOERR;
 }
 
+/**
+ * @brief decode one variable
+ * @param[in] c pointer of nlp context
+ * @param[in] variable variable
+ * @param[in] vl value list
+ * @return error code
+ * @retval NLP_NOERR success
+ * @retval NLP_ERR_NOMEM no memory
+ */
 int nlp_decode_one_variable(struct nlp_t *c, struct nlp_variable_t *variable, struct nlp_value_list_t *vl)
 {
     struct nlp_decode_variable_t *dc;
@@ -116,7 +160,12 @@ int nlp_decode_one_variable(struct nlp_t *c, struct nlp_variable_t *variable, st
     return 0;
 }
 
-
+/**
+ * @brief set start address
+ * @param[in] c pointer of nlp context
+ * @param[in] variable variable
+ * @param[in] val value
+ */
 int nlp_decode_set_start_address(struct nlp_t *c, struct nlp_variable_t *variable, struct nlp_value_t **val)
 {
     struct nlp_decode_variable_t *dc;

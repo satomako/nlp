@@ -1,3 +1,8 @@
+/*
+* nlp_variable.c
+* This file is part of nlp.
+* This file handles variable types and structures.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -72,7 +77,9 @@ struct nlp_variable_t *nlp_create_variable(char *name, int type, int size, int p
 }
 
 /**
- * @brief
+ * @brief add member to variable
+ * @param[in] variable variable structure
+ * @param[in] member member
 */
 int nlp_add_member(struct nlp_variable_t *variable, struct nlp_variable_t *member)
 {
@@ -103,7 +110,9 @@ int nlp_add_member(struct nlp_variable_t *variable, struct nlp_variable_t *membe
 }
 
 /**
- * @brief
+ * @brief find member
+ * @param[in] variable variable structure
+ * @param[in] name member name
 */
 struct nlp_variable_t *nlp_find_member(struct nlp_variable_t *variable, char *name)
 {
@@ -121,7 +130,9 @@ struct nlp_variable_t *nlp_find_member(struct nlp_variable_t *variable, char *na
 }
 
 /**
- * @brief
+ * @brief clone variable
+ * @param[in] variable variable structure
+ * @return pointer of cloned variable, NULL at failed
 */
 struct nlp_variable_t *nlp_clone_variable(struct nlp_variable_t *variable)
 {
@@ -188,7 +199,9 @@ struct nlp_variable_t *nlp_clone_variable(struct nlp_variable_t *variable)
 }
 
 /**
- * @brief 
+ * @brief dispose variable
+ * @param[in] variable variable structure
+ * @return NLP_NOERR at success, otherwise NLP_ERR_XXX 
 */
 int nlp_dispose_variable(struct nlp_variable_t *variable)
 {
@@ -200,13 +213,14 @@ int nlp_dispose_variable(struct nlp_variable_t *variable)
         return NLP_ERR_NULL_POINTER;
     }
 
+
     
 }
 
 
 /**
  * @brief find variable
- * @param valiable_list
+ * @param valiable_list 
  * @param name
  * @return
 */

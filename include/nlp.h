@@ -8,13 +8,13 @@
 #define NLP_MAX_STRING_LENGTH    (65536)
 #define NLP_BUFFER_SIZE          (1024)
 
-#define NLP_NOERR                (0)
-#define NLP_ERR_NULL_POINTER     (1)
-#define NLP_ERR_NOMEM            (2)
-#define NLP_ERR_VARIABLE_EXISTS  (3)
-#define NLP_ERR_MEMBER_EXISTS    (4)
-#define NLP_ERR_BAD_ARGUMENT     (5)
-#define NLP_ERR_BAD_STATUS       (6)
+#define NLP_NOERR                (0) // no error
+#define NLP_ERR_NULL_POINTER     (1) // null pointer
+#define NLP_ERR_NOMEM            (2) // no memory
+#define NLP_ERR_VARIABLE_EXISTS  (3) // variable exists
+#define NLP_ERR_MEMBER_EXISTS    (4) // member exists
+#define NLP_ERR_BAD_ARGUMENT     (5) // bad argument
+#define NLP_ERR_BAD_STATUS       (6) // bad status
 
 #define NLP_TYPE_INT8            (1)
 #define NLP_TYPE_INT32           (2)
@@ -50,10 +50,24 @@ struct YYLTYPE
 #endif
 int yylex();
 void yyerror(const char *);
-int yywrap();
+//int yywrap();
 void yyerror(const char *str);
 
-
+/**
+ * @brief nlp variable structure
+ * @param name variable name
+ * @param type variable type
+ * @param size variable size
+ * @param padding padding size
+ * @param msize member size
+ * @param dim dimension
+ * @param min minimum value of array subscript
+ * @param max maximum value of array subscript
+ * @param cur current value of array subscript
+ * @param next next variable
+ * @param member member
+ * @param level level of member nesting
+ */
 struct nlp_variable_t
 {
     char name[NLP_MAX_IDENTIFIER_LEN+1];
@@ -70,6 +84,12 @@ struct nlp_variable_t
     int level;
 };
 
+/**
+ * @brief nlp variable list structure
+ * @param prev previous variable list
+ * @param next next variable list
+ * @param v variable
+ */
 struct nlp_variable_list_t
 {
     struct nlp_variable_list_t *prev;
@@ -77,6 +97,16 @@ struct nlp_variable_list_t
     struct nlp_variable_t *v;
 };
 
+/**
+ * @brief nlp value structure
+ * @param next next value
+ * @param value value
+ * @param type value type
+ * @param first_line first line in input
+ * @param first_column first column in input
+ * @param last_line last line in input
+ * @param last_column last column in input
+ */
 struct nlp_value_t
 {
     struct nlp_value_t *next;
@@ -88,13 +118,32 @@ struct nlp_value_t
     int last_column;
 };
 
-
+/**
+ * @brief nlp value list structure
+ * @param next next value list
+ * @param list_head list head
+ */
 struct nlp_value_list_t
 {
     struct nlp_value_list_t *next;
     struct nlp_value_t list_head;
 };
 
+/**
+ * @brief nlp decode variable structure
+ * @param variable variable
+ * @param value_list value list
+ * @param value_sp value stack pointer
+ * @param value_stack value stack
+ * @param value_multiply value multiply
+ * @param comma_state comma state
+ * @param variable_sp variable stack pointer
+ * @param variable_stack variable stack
+ * @param current current variable
+ * @param exceed exceed flag
+ * @param decode_state decode state
+ * @param p pointer of real variable
+ */
 struct nlp_decode_variable_t
 {
     struct nlp_variable_t *variable;
@@ -111,6 +160,18 @@ struct nlp_decode_variable_t
     void *p;
 };
 
+/**
+ * @brief nlp context structure
+ * @param variable_list_head variable list head
+ * @param decode_variable decode variable
+ * @param value_list_head value list head
+ * @param current_value_list_head current value list head
+ * @param value_state value state
+ * @param opt_dryrun dryrun option
+ * @param opt_verbose verbose option
+ * @param scanning_string scanning string
+ * @param scanning_string_length scanning string length
+ */
 struct nlp_t
 {
     struct nlp_variable_list_t variable_list_head;

@@ -2,6 +2,7 @@
 #include <stdint.h>
 }
 
+%option noyywrap
 
 %{
 #include <stdio.h>
@@ -26,15 +27,8 @@ SN		[+-]
 EP		[deDE]{SN}?{DG}+
 FC		{DG}*"."{DG}+
 FC2		{DG}+"."
-SM      ";"
 
-%start NAMEL
-%start VNAME
-%start SSTR
-%start DSTR
-%start IFILE
-%start COMMENT
-
+%s NAMEL VNAME SSTR DSTR IFILE COMMENT
 
 %%
 <NAMEL>\/ {
@@ -236,7 +230,7 @@ SM      ";"
     BEGIN NAMEL;
 }
 <COMMENT>. ;
-<NAMEL>\;; {
+<NAMEL>\; {
 #ifdef __DEBUG_LEX__
     printf("LEX:SM:<NAMEL>;  %s\n", yytext);
 #endif

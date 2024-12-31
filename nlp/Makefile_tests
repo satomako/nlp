@@ -2,7 +2,8 @@
 #TESTS      = variable_dump.exe
 #TESTS      = test_value_value_list.exe
 #TESTS      = test01.exe variable_dump.exe test_value_value_list.exe
-TESTS      = test01.exe test02.exe test_value_value_list.exe variable_dump.exe
+#TESTS      = test01.exe test02.exe test_value_value_list.exe variable_dump.exe
+TESTS      = test03.exe
 
 CC         = gcc
 LD         = ld
@@ -23,6 +24,9 @@ test01.exe: test01.o libnlp.a
 
 test02.exe: test02.o libnlp.a
 	$(CC) -o $@ test02.o $(LIBS)
+
+test03.exe: test03.o libnlp.a
+	$(CC) -o $@ test03.o $(LIBS)
 
 variable_dump.exe: variable_dump.o libnlp.a
 	$(CC) -o $@ variable_dump.o $(LIBS)

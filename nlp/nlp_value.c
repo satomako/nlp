@@ -1,3 +1,8 @@
+/*
+* nlp_value.c
+* This file is part of nlp.
+* This file handles variable decoding.
+*/
 #include <stdio.h>
 #include <stdlib.h>
 #include "nlp.h"
@@ -31,6 +36,11 @@ void _nlp_print_value_list(struct nlp_t *c)
     }
 }
 
+/**
+ * @brief count values in the value list
+ * @param c pointer of nlp context
+ * @return count of values in the value list
+ */
 int nlp_value_list_count(struct nlp_t *c)
 {
     int count;
@@ -43,6 +53,10 @@ int nlp_value_list_count(struct nlp_t *c)
     return count;
 }
 
+/**
+ * @brief create new value list
+ * @return pointer of created value list
+ */
 struct nlp_value_list_t *nlp_create_value_list()
 {
     struct nlp_value_list_t *vl;
@@ -50,7 +64,11 @@ struct nlp_value_list_t *nlp_create_value_list()
     return vl;
 }
 
-
+/**
+ * @brief add value list to the context
+ * @param c pointer of nlp context
+ * @return NLP_NOERR at success, otherwise NLP_ERR_XXX
+ */
 int nlp_add_value_list(struct nlp_t *c)
 {
     struct nlp_value_list_t *i;
@@ -72,6 +90,10 @@ int nlp_add_value_list(struct nlp_t *c)
     return NLP_NOERR;
 }
 
+/**
+ * @brief remove first value from the context
+ * @param c pointer of nlp context
+ */
 void nlp_remove_value_list_first(struct nlp_t *c)
 {
     struct nlp_value_list_t *vl;
