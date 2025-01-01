@@ -1,9 +1,13 @@
-HOGE,struct,1,{1},{100}
-    {
-        HIGE,int32,2,{1,1},{2,3}
-    }
-B,int32,1,{1},{3}
-C,struct,0,{},{}
-    {
-        D,int32,0,{},{}
-    }
+typdef hoge_t {
+    int32 HIGE(1,2:3);
+}
+
+typedef c_t {
+    int32 D;
+}
+
+type hoge_t HOGE(100);
+
+int32 B(3);
+
+type c_t C;

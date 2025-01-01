@@ -19,7 +19,20 @@ void zzerror(const char *str)
 
 int main(int ac, char *av[])
 {
-    char input[] = "int8 hoge(10);  int8 hige(10:10);\0";
+    //char input[] = "int8 a;\0";
+    //char input[] = "typdef HOGE { int8 a; int8 b;} int8 x; type HOGE z(10);\0";
+
+    char input[] =  "typedef hoge_t {"
+                    "    int32 HIGE(1,2:3);"
+                    "}"
+                    "typedef c_t {"
+                    "    int32 D;"
+                    "}"
+                    "type hoge_t HOGE(100);"
+                    "int32 B(3);"
+                    "type c_t C;"
+                    "\0";
+
     //YY_BUFFER_STATE buffer = zz_scan_buffer(input, sizeof(input));
     //zzparse();
 

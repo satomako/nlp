@@ -26,8 +26,6 @@ SN		[+-]
 
 %%
 
-<INITIAL>
-
 <INITIAL>int8 {
     BEGIN DEF;
     return INT8;
@@ -58,6 +56,16 @@ SN		[+-]
     return STRING;
 }
 
+<INITIAL>typedef {
+    BEGIN DEF;
+    return TYPEDEF;
+}
+
+<INITIAL>type {
+    BEGIN DEF;
+    return TYPE;
+}
+
 <DEF>{SN}?{NM}{DG}* {
     return INTEGER;
 }
@@ -72,6 +80,15 @@ SN		[+-]
 
 <DEF>")" {
     return RP;
+}
+
+<DEF>"{" {
+    BEGIN INITIAL;
+    return LB;
+}
+
+<INITIAL>"}" {
+    return RB;
 }
 
 <DEF>":" {

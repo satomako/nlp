@@ -5,6 +5,7 @@ VPATH      = ../../nlp:../../include:../../test
 LEX        = flex
 LEXFLAGS   =
 YACC       = bison
+#YACCFLAGS  = --locations --defines --file-prefix=nlp --verbose -Wcounterexamples
 YACCFLAGS  = --locations --defines --file-prefix=nlp --verbose
 YACCFLAGS_INTERNAL  = --locations --defines --file-prefix=nlp_internal --verbose
 CC         = gcc
