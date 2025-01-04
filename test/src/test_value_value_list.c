@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include "nlp.tab.h"
+#include "nlp.lex.h"
 #include "nlp.h"
 
 int main(int ac, char *av[])

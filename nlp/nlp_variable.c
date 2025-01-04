@@ -1,19 +1,20 @@
 /*
-* nlp_variable.c
-* This file is part of nlp.
-* This file handles variable types and structures.
-*/
+ * nlp_variable.c
+ * This file is part of nlp.
+ * This file handles variable types and structures.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "nlp.tab.h"
+#include "nlp.lex.h"
 #include "nlp.h"
 
 struct nlp_variable_t *nlp_create_variable_from_text(char *text)
 {
     return NULL;
 }
-
 
 /**
  * @brief create new variable structure
@@ -22,47 +23,56 @@ struct nlp_variable_t *nlp_create_variable_from_text(char *text)
  * @param[in] size variable size
  * @param[in] padding padding size
  * @param[in] dim variable dimension
- * @param[in] min 
- * @param[in] max 
+ * @param[in] min
+ * @param[in] max
  * @return pointer of created variable, NULL at failed
-*/
+ */
 struct nlp_variable_t *nlp_create_variable(char *name, int type, int size, int padding, int dim, int min[], int max[])
 {
     struct nlp_variable_t *v;
 
-    if (name == NULL) return NULL;
-    if (strlen(name) > NLP_MAX_IDENTIFIER_LEN) return NULL;
-    if (type < 1 || type > NLP_TYPE_STRUCT) return NULL;
-    if (type == NLP_TYPE_FSTRING && size < 1) return NULL;
-    if (dim < 0 || dim > NLP_MAX_DIMENSION) return NULL;
-    if (min == NULL) return NULL;
-    if (max == NULL) return NULL;
+    if (name == NULL)
+        return NULL;
+    if (strlen(name) > NLP_MAX_IDENTIFIER_LEN)
+        return NULL;
+    if (type < 1 || type > NLP_TYPE_STRUCT)
+        return NULL;
+    if (type == NLP_TYPE_FSTRING && size < 1)
+        return NULL;
+    if (dim < 0 || dim > NLP_MAX_DIMENSION)
+        return NULL;
+    if (min == NULL)
+        return NULL;
+    if (max == NULL)
+        return NULL;
     for (int i = 0; i < dim; i++)
     {
-        if (min[i] > max[i]) return NULL;
+        if (min[i] > max[i])
+            return NULL;
     }
 
-    if ((v = calloc(1, sizeof(struct nlp_variable_t))) == NULL) return NULL;
+    if ((v = calloc(1, sizeof(struct nlp_variable_t))) == NULL)
+        return NULL;
     t_strlcpy(v->name, name, sizeof(v->name));
     v->type = type;
     switch (type)
     {
-        case NLP_TYPE_INT8:
-            v->size = 1;
-            break;
-        case NLP_TYPE_INT32:
-        case NLP_TYPE_REAL32:
-            v->size = 4;
-            break;
-        case NLP_TYPE_INT64:
-        case NLP_TYPE_REAL64:
-            v->size = 8;
-            break;
-        case NLP_TYPE_STRUCT:
-            v->size = 0;
-            break;
-        default:
-            v->size = 0;
+    case NLP_TYPE_INT8:
+        v->size = 1;
+        break;
+    case NLP_TYPE_INT32:
+    case NLP_TYPE_REAL32:
+        v->size = 4;
+        break;
+    case NLP_TYPE_INT64:
+    case NLP_TYPE_REAL64:
+        v->size = 8;
+        break;
+    case NLP_TYPE_STRUCT:
+        v->size = 0;
+        break;
+    default:
+        v->size = 0;
     }
     v->padding = padding;
     v->msize = v->size + padding;
@@ -80,20 +90,23 @@ struct nlp_variable_t *nlp_create_variable(char *name, int type, int size, int p
  * @brief add member to variable
  * @param[in] variable variable structure
  * @param[in] member member
-*/
+ */
 int nlp_add_member(struct nlp_variable_t *variable, struct nlp_variable_t *member)
 {
     struct nlp_variable_t *v;
 
-    if (variable == NULL) return NLP_ERR_NULL_POINTER;
-    if (member == NULL) return NLP_ERR_NULL_POINTER;
+    if (variable == NULL)
+        return NLP_ERR_NULL_POINTER;
+    if (member == NULL)
+        return NLP_ERR_NULL_POINTER;
     if (variable->member == NULL)
     {
         variable->member = member;
     }
     else
     {
-        if (nlp_find_member(variable, member->name) != NULL) return NLP_ERR_MEMBER_EXISTS;
+        if (nlp_find_member(variable, member->name) != NULL)
+            return NLP_ERR_MEMBER_EXISTS;
 
         for (v = variable->member; v != NULL; v = v->next)
         {
@@ -113,18 +126,22 @@ int nlp_add_member(struct nlp_variable_t *variable, struct nlp_variable_t *membe
  * @brief find member
  * @param[in] variable variable structure
  * @param[in] name member name
-*/
+ */
 struct nlp_variable_t *nlp_find_member(struct nlp_variable_t *variable, char *name)
 {
     struct nlp_variable_t *v;
 
-    if (variable == NULL) return NULL;
-    if (name == NULL) return NULL;
-    if (variable->type != NLP_TYPE_STRUCT) return NULL;
+    if (variable == NULL)
+        return NULL;
+    if (name == NULL)
+        return NULL;
+    if (variable->type != NLP_TYPE_STRUCT)
+        return NULL;
 
     for (v = variable->member; v != NULL; v = v->next)
     {
-        if (strcmp(v->name, name) == 0) return v;
+        if (strcmp(v->name, name) == 0)
+            return v;
     }
     return NULL;
 }
@@ -133,27 +150,29 @@ struct nlp_variable_t *nlp_find_member(struct nlp_variable_t *variable, char *na
  * @brief clone variable
  * @param[in] variable variable structure
  * @return pointer of cloned variable, NULL at failed
-*/
+ */
 struct nlp_variable_t *nlp_clone_variable(struct nlp_variable_t *variable)
 {
     struct nlp_variable_t *src[NLP_MAX_MEMBER_DEPTH];
     struct nlp_variable_t *dst[NLP_MAX_MEMBER_DEPTH];
     int sp;
 
-    if (variable == NULL) return NULL;
+    if (variable == NULL)
+        return NULL;
     sp = 0;
     src[sp] = variable;
 
     while (1)
     {
         if ((dst[sp] = nlp_create_variable(
-            src[sp]->name,
-            src[sp]->type,
-            src[sp]->size,
-            src[sp]->padding,
-            src[sp]->dim,
-            src[sp]->min,
-            src[sp]->max)) == NULL) return NULL;
+                 src[sp]->name,
+                 src[sp]->type,
+                 src[sp]->size,
+                 src[sp]->padding,
+                 src[sp]->dim,
+                 src[sp]->min,
+                 src[sp]->max)) == NULL)
+            return NULL;
         dst[sp]->msize = src[sp]->msize;
         if (sp > 0)
         {
@@ -201,8 +220,8 @@ struct nlp_variable_t *nlp_clone_variable(struct nlp_variable_t *variable)
 /**
  * @brief dispose variable
  * @param[in] variable variable structure
- * @return NLP_NOERR at success, otherwise NLP_ERR_XXX 
-*/
+ * @return NLP_NOERR at success, otherwise NLP_ERR_XXX
+ */
 int nlp_dispose_variable(struct nlp_variable_t *variable)
 {
     struct nlp_variable_t *stack[NLP_MAX_MEMBER_DEPTH];
@@ -212,19 +231,15 @@ int nlp_dispose_variable(struct nlp_variable_t *variable)
     {
         return NLP_ERR_NULL_POINTER;
     }
-
-
-    
 }
-
 
 /**
  * @brief find variable
- * @param valiable_list 
+ * @param valiable_list
  * @param name
  * @return
-*/
-struct nlp_variable_t * nlp_find_variable(struct nlp_variable_list_t *variable_list, char *name)
+ */
+struct nlp_variable_t *nlp_find_variable(struct nlp_variable_list_t *variable_list, char *name)
 {
     struct nlp_variable_list_t *head, *i;
 
@@ -239,13 +254,12 @@ struct nlp_variable_t * nlp_find_variable(struct nlp_variable_list_t *variable_l
     return NULL;
 }
 
-
 /**
  * @brief add variable to valiable list.
  * @param variable_list
  * @param variable
  * @return
-*/
+ */
 int nlp_add_variable(struct nlp_variable_list_t *variable_list, struct nlp_variable_t *variable)
 {
     if (nlp_find_variable(variable_list, variable->name) != NULL)
@@ -256,17 +270,19 @@ int nlp_add_variable(struct nlp_variable_list_t *variable_list, struct nlp_varia
     return nlp_append_variable_list(variable_list, variable);
 }
 
-
 /**
  * @brief
-*/
+ */
 int nlp_append_variable_list(struct nlp_variable_list_t *variable_list, struct nlp_variable_t *variable)
 {
     struct nlp_variable_list_t *vl;
 
-    if (variable_list == NULL) return NLP_ERR_NULL_POINTER;
-    if (variable == NULL) return NLP_ERR_NULL_POINTER;
-    if ((vl = malloc(sizeof(struct nlp_variable_list_t))) == NULL) return NLP_ERR_NOMEM;
+    if (variable_list == NULL)
+        return NLP_ERR_NULL_POINTER;
+    if (variable == NULL)
+        return NLP_ERR_NULL_POINTER;
+    if ((vl = malloc(sizeof(struct nlp_variable_list_t))) == NULL)
+        return NLP_ERR_NOMEM;
 
     vl->next = variable_list;
     vl->prev = variable_list->prev;
@@ -277,17 +293,17 @@ int nlp_append_variable_list(struct nlp_variable_list_t *variable_list, struct n
     return NLP_NOERR;
 }
 
-
 /**
- * 
-*/
+ *
+ */
 int nlp_calc_struct_size(struct nlp_variable_t *variable, struct nlp_variable_t *stack[], int sp)
 {
     int count;
     int i;
     int ret;
 
-    if (variable == NULL) return NLP_ERR_NULL_POINTER;
+    if (variable == NULL)
+        return NLP_ERR_NULL_POINTER;
     stack[sp] = variable;
 
     while (1)
@@ -296,7 +312,8 @@ int nlp_calc_struct_size(struct nlp_variable_t *variable, struct nlp_variable_t 
         {
             stack[sp]->size = 0;
             ret = nlp_calc_struct_size(stack[sp]->member, stack, sp + 1);
-            if (ret != NLP_NOERR) return ret;
+            if (ret != NLP_NOERR)
+                return ret;
         }
 
         count = 1;
@@ -310,13 +327,13 @@ int nlp_calc_struct_size(struct nlp_variable_t *variable, struct nlp_variable_t 
         {
             stack[sp - 1]->size += stack[sp]->msize;
         }
-        if (stack[sp]->next == NULL) break;
+        if (stack[sp]->next == NULL)
+            break;
         stack[sp] = stack[sp]->next;
     }
 
     return NLP_NOERR;
 }
-
 
 void *nlp_current_pointer();
 
@@ -445,7 +462,8 @@ int nlp_forward_reference(struct nlp_decode_variable_t *v)
         }
     }
     printf("VARIABLE: ");
-    for (i = 0; i < v->variable_sp; i++){
+    for (i = 0; i < v->variable_sp; i++)
+    {
         printf("%s", v->variable_stack[i]->name);
         if (v->variable_stack[i]->dim > 0)
         {

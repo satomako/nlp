@@ -1,71 +1,51 @@
 /*
-* nlp.c
-* This file is part of nlp.
-*/
+ * nlp.c
+ * This file is part of nlp.
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "nlp.h"
+typedef void *yyscan_t;
 #include "nlp.tab.h"
+#include "nlp.lex.h"
+#include "nlp.h"
 
-//int _nlp_print_current(struct nlp_t *c);
 int _nlp_print_current(struct nlp_decode_variable_t *dc, int opt);
-char* _nlp_type_to_string(int type);
-
-/*
- * current context
-*/
-static struct nlp_t *_cc;
+char *_nlp_type_to_string(int type);
 
 int yywrap()
 {
-	return 1;
+    return 1;
 }
 
-void yyerror(const char *str)
+void yyerror(YYLTYPE *yyllocp, yyscan_t dummy, const char *message)
 {
 }
 
 /**
  * @brief initialize nlp context
  * @param[in] c pointer of nlp context
+ * @return error code
  */
 int nlp_init(struct nlp_t *c)
 {
     memset(c, 0, sizeof(struct nlp_t));
+    yylex_init(&c->scanner);
+    yyset_extra(c, c->scanner);
     c->variable_list_head.next = &c->variable_list_head;
     c->variable_list_head.prev = &c->variable_list_head;
     c->opt_dryrun = 0;
     c->value_state = NLP_VALUE_STATE_INIT;
-
-    //TODO
-    _cc = c;
+    return NLP_NOERR;
 }
 
 int nlp_set_dryrun(struct nlp_t *c, int option)
 {
-    if (option < 0 || option > 1) return NLP_ERR_BAD_ARGUMENT;
+    if (option < 0 || option > 1)
+        return NLP_ERR_BAD_ARGUMENT;
     c->opt_dryrun = option;
     return NLP_NOERR;
-}
-
-/**
- * @brief get current context
- * @return pointer of current context
- */
-struct nlp_t *nlp_get_current_context()
-{
-    return _cc;
-}
-
-/**
- * @brief set current context
- * @param[in] c pointer of nlp context
- */
-void nlp_set_current_context(struct nlp_t *c)
-{
-    _cc = c;
 }
 
 /**
@@ -94,8 +74,9 @@ int nlp_decode(struct nlp_t *c)
     struct nlp_value_list_t *vl;
     struct nlp_variable_t *var;
 
-    if (c == NULL) return NLP_ERR_BAD_ARGUMENT;
-    for (vl = c->value_list_head.next; vl != NULL; vl = vl->next)    
+    if (c == NULL)
+        return NLP_ERR_BAD_ARGUMENT;
+    for (vl = c->value_list_head.next; vl != NULL; vl = vl->next)
     {
         fprintf(stderr, "*** nlp_decode value list p %p\n", vl);
         fprintf(stderr, "identifier=%s\n", vl->list_head.next->value);
@@ -129,16 +110,17 @@ int nlp_decode_one_variable(struct nlp_t *c, struct nlp_variable_t *variable, st
     struct nlp_value_t *val;
     int i;
 
-//TODO
-//fprintf(stderr, "nlp_decode_one_variable\n");
-//fprintf(stderr, "*** 1 %s\n", variable->name);
+    // TODO
+    // fprintf(stderr, "nlp_decode_one_variable\n");
+    // fprintf(stderr, "*** 1 %s\n", variable->name);
 
     dc = &c->decode_variable;
 
     var = nlp_clone_variable(variable);
-//TODO
-//fprintf(stderr, "*** 2\n");
-    if (var == NULL) return NLP_ERR_NOMEM;
+    // TODO
+    // fprintf(stderr, "*** 2\n");
+    if (var == NULL)
+        return NLP_ERR_NOMEM;
     dc->variable = var;
     dc->variable_sp = 0;
     dc->variable_stack[dc->variable_sp] = var;
@@ -149,12 +131,12 @@ int nlp_decode_one_variable(struct nlp_t *c, struct nlp_variable_t *variable, st
     dc->current = var;
 
     val = vl->list_head.next->next;
-//TODO
-//fprintf(stderr, "*** 3 (%p) %s\n", val, val->value);
+    // TODO
+    // fprintf(stderr, "*** 3 (%p) %s\n", val, val->value);
     nlp_decode_set_start_address(c, variable, &val);
-//TODO
-//fprintf(stderr, "*** 4 _nlp_print_current\n");
-//_nlp_print_current(c);
+    // TODO
+    // fprintf(stderr, "*** 4 _nlp_print_current\n");
+    //_nlp_print_current(c);
     nlp_decode_values(dc, val->next);
 
     return 0;
@@ -175,8 +157,8 @@ int nlp_decode_set_start_address(struct nlp_t *c, struct nlp_variable_t *variabl
 
     for (; *val; *val = (*val)->next)
     {
-//TODO
-//fprintf(stderr, "addr %s\n", (*val)->value);
+        // TODO
+        // fprintf(stderr, "addr %s\n", (*val)->value);
         if ((*val)->type == LP)
         {
             nlp_decode_dimension(dc, val);
@@ -190,12 +172,12 @@ int nlp_decode_set_start_address(struct nlp_t *c, struct nlp_variable_t *variabl
                 dc->variable_sp++;
                 dc->variable_stack[dc->variable_sp] = member;
                 dc->current = member;
-//TODO
-//fprintf(stderr, "member %s\n", member->name);
+                // TODO
+                // fprintf(stderr, "member %s\n", member->name);
             }
             else
             {
-                //TODO error handling
+                // TODO error handling
             }
         }
         if ((*val)->type == EQ)
@@ -206,14 +188,14 @@ int nlp_decode_set_start_address(struct nlp_t *c, struct nlp_variable_t *variabl
     return NLP_NOERR;
 }
 
-
 int nlp_decode_dimension(struct nlp_decode_variable_t *dc, struct nlp_value_t **val)
 {
     int dim;
     long ind;
     char *endptr;
 
-    if ((*val)->next == NULL) return NLP_ERR_BAD_STATUS;
+    if ((*val)->next == NULL)
+        return NLP_ERR_BAD_STATUS;
     dim = 0;
     for (*val = (*val)->next; *val; *val = (*val)->next)
     {
@@ -231,15 +213,14 @@ int nlp_decode_dimension(struct nlp_decode_variable_t *dc, struct nlp_value_t **
             ind = strtol((*val)->value, &endptr, 10);
             if (endptr)
             {
-                //TODO error handling
+                // TODO error handling
             }
             dc->current->cur[dim] = (int)ind;
-//fprintf(stderr, "dim %d %d\n", dim, (int)ind);
+            // fprintf(stderr, "dim %d %d\n", dim, (int)ind);
         }
     }
     return NLP_NOERR;
 }
-
 
 int nlp_decode_values(struct nlp_decode_variable_t *dc, struct nlp_value_t *val)
 {
@@ -247,16 +228,6 @@ int nlp_decode_values(struct nlp_decode_variable_t *dc, struct nlp_value_t *val)
     char buf[NLP_BUFFER_SIZE];
     size_t vlen;
 
-//TODO
-//    fprintf(stderr, "ENTER nlp_decode_values %s\n", dc->variable->name);
-/*
-    for (val = val->next; val; val = val->next)
-    {
-printf("value = %s\n", val->value);
-_nlp_print_current(_cc);
-fprintf(stderr, "value = %s\n", val->value);
-    }
-*/
     dc->value_sp = 0;
     dc->value_stack[dc->value_sp] = val;
     dc->comma_state[dc->value_sp] = 1;
@@ -270,15 +241,15 @@ fprintf(stderr, "value = %s\n", val->value);
         vlen = strlen(val->value);
         if (val->type == MULMUL)
         {
-//printf("XXX MULMUL\n");
+            // printf("XXX MULMUL\n");
             multiply = -1;
         }
         else if (val->type == NUMMUL)
         {
-//printf("XXX NUMMUL\n");
+            // printf("XXX NUMMUL\n");
             if (vlen >= NLP_BUFFER_SIZE)
             {
-                //TODO
+                // TODO
                 return NLP_ERR_BAD_STATUS;
             }
             t_strlcpy(buf, val->value, sizeof(buf));
@@ -292,14 +263,14 @@ fprintf(stderr, "value = %s\n", val->value);
         }
         else if (val->type == LP)
         {
-//printf("XXX LP\n");
+            // printf("XXX LP\n");
             dc->value_sp++;
             dc->value_stack[dc->value_sp] = val->next;
             dc->value_multiply[dc->value_sp] = multiply;
         }
         else if (val->type == RP)
         {
-//printf("XXX RP\n");
+            // printf("XXX RP\n");
             if (dc->value_multiply[dc->value_sp] == -1)
             {
                 val = dc->value_stack[dc->value_sp];
@@ -316,19 +287,19 @@ fprintf(stderr, "value = %s\n", val->value);
         }
         else
         {
-//printf("XXX ELSE\n");
-            //if (dc->exceed)
+            // printf("XXX ELSE\n");
+            // if (dc->exceed)
             //{
-            //}
-//printf("value_sp       = %d\n", dc->value_sp);
-//printf("value_multiply = %d\n", dc->value_multiply[dc->value_sp]);
-//printf("multiply       = %d\n", multiply);
-//printf("state          = %d\n", dc->decode_state);
-//printf("value          = %s\n", val->value);
+            // }
+            // printf("value_sp       = %d\n", dc->value_sp);
+            // printf("value_multiply = %d\n", dc->value_multiply[dc->value_sp]);
+            // printf("multiply       = %d\n", multiply);
+            // printf("state          = %d\n", dc->decode_state);
+            // printf("value          = %s\n", val->value);
 
             if (multiply == -1)
             {
-//printf("MULMUL %s\n", val->value);
+                // printf("MULMUL %s\n", val->value);
                 multiply = 1;
                 break;
             }
@@ -336,27 +307,27 @@ fprintf(stderr, "value = %s\n", val->value);
             {
                 while (multiply > 0)
                 {
-//printf("while multiply = %d\n", dc->value_multiply[dc->value_sp]);
+                    // printf("while multiply = %d\n", dc->value_multiply[dc->value_sp]);
                     if (val->type == CM)
                     {
                         if (dc->decode_state == NLP_DECODE_STATE_COMMA)
                         {
-//printf("addr++\n");
+                            // printf("addr++\n");
                             nlp_forward_reference(dc);
                         }
                         else
                         {
-//printf("nothing\n");
+                            // printf("nothing\n");
                         }
                         dc->decode_state = NLP_DECODE_STATE_COMMA;
                     }
                     else
                     {
-//printf("let addr++\n");
-//_nlp_print_current(dc, 0);
-//printf(" = %s\n", val->value);
-_nlp_print_current(dc, 2);
-printf(" = %s\n", val->value);
+                        // printf("let addr++\n");
+                        //_nlp_print_current(dc, 0);
+                        // printf(" = %s\n", val->value);
+                        _nlp_print_current(dc, 2);
+                        printf(" = %s\n", val->value);
                         dc->decode_state = NLP_DECODE_STATE_VALUE;
                         nlp_forward_reference(dc);
                     }
@@ -365,20 +336,20 @@ printf(" = %s\n", val->value);
                 multiply = 1;
             }
         }
-        if (val->next == NULL) break;
+        if (val->next == NULL)
+            break;
         val = val->next;
     }
     return NLP_NOERR;
 }
 
-
-//int _nlp_print_current(struct nlp_t *c)
+// int _nlp_print_current(struct nlp_t *c)
 int _nlp_print_current(struct nlp_decode_variable_t *dc, int opt)
 {
-//    struct nlp_decode_variable_t *dc;
+    //    struct nlp_decode_variable_t *dc;
     int sp;
 
-//    dc = &c->decode_variable;
+    //    dc = &c->decode_variable;
     for (sp = 0; sp <= dc->variable_sp; sp++)
     {
         if (sp > 0)
@@ -405,17 +376,24 @@ int _nlp_print_current(struct nlp_decode_variable_t *dc, int opt)
         printf("\n    type: %s\n", _nlp_type_to_string(dc->current->type));
         printf("    ");
     }
-    if (opt & 1) printf("\n");
+    if (opt & 1)
+        printf("\n");
     return NLP_NOERR;
 }
 
-char* _nlp_type_to_string(int type)
+char *_nlp_type_to_string(int type)
 {
-    if (type == NLP_TYPE_INT8) return "int8";
-    if (type == NLP_TYPE_INT32) return "int32";
-    if (type == NLP_TYPE_INT64) return "int64";
-    if (type == NLP_TYPE_REAL32) return "real32";
-    if (type == NLP_TYPE_REAL32) return "real32";
-    if (type == NLP_TYPE_FSTRING) return "fixed string";
+    if (type == NLP_TYPE_INT8)
+        return "int8";
+    if (type == NLP_TYPE_INT32)
+        return "int32";
+    if (type == NLP_TYPE_INT64)
+        return "int64";
+    if (type == NLP_TYPE_REAL32)
+        return "real32";
+    if (type == NLP_TYPE_REAL32)
+        return "real32";
+    if (type == NLP_TYPE_FSTRING)
+        return "fixed string";
     return "(unknown)";
 }

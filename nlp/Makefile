@@ -2,11 +2,13 @@ LIBRARY    = libnlp.a
 
 VPATH      = ../../nlp:../../include:../../test
 
+DEBUGOPT   = --debug
+#DEBUGOPT   =
 LEX        = flex
-LEXFLAGS   =
+LEXFLAGS   = $(DEBUGOPT) --header-file=$(patsubst %.c,%.h,$@)
 YACC       = bison
 #YACCFLAGS  = --locations --defines --file-prefix=nlp --verbose -Wcounterexamples
-YACCFLAGS  = --locations --defines --file-prefix=nlp --verbose
+YACCFLAGS  = $(DEBUGOPT) --defines=$(patsubst %c,%h,$@)
 YACCFLAGS_INTERNAL  = --locations --defines --file-prefix=nlp_internal --verbose
 CC         = gcc
 LD         = ld
@@ -36,9 +38,9 @@ nlp_value.o: nlp_value.c nlp.h
 nlp_util.o: nlp_util.c nlp.h
 
 nlp.lex.c: nlp.l nlp.h nlp.tab.c
-	$(LEX) $(LEXFLAGS) -o $@ $<
+	$(LEX) -o $@ $(LEXFLAGS) $<
 nlp.tab.c: nlp.y nlp.h
-	$(YACC) $(YACCFLAGS) $<
+	$(YACC) -o $@ $(YACCFLAGS) $<
 
 nlp_internal.lex.c: nlp_internal.l nlp_internal.tab.c
 	$(LEX) $(LEXFLAGS) -o $@ $<

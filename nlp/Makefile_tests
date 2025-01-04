@@ -3,12 +3,12 @@
 #TESTS      = test_value_value_list.exe
 #TESTS      = test01.exe variable_dump.exe test_value_value_list.exe
 #TESTS      = test01.exe test02.exe test_value_value_list.exe variable_dump.exe
-TESTS      = test03.exe
+TESTS      = test02.exe
 
 CC         = gcc
 LD         = ld
 COPTS      = -O0 -g
-CFLAGS     = $(COPTS) -I../../include
+CFLAGS     = $(COPTS) -I../../include -I.
 LDFLAGS    = $(COPTS)
 LIBS       = -L. -lnlp
 

@@ -1,19 +1,32 @@
-%top{
-#include <stdint.h>
-}
-
-%option noyywrap
+%option noinput nounput noyywrap 8bit nodefault
+%option yylineno
+%option reentrant bison-bridge bison-locations
 
 %{
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
+#include "nlp.tab.h"
 
+#define YY_USER_ACTION                              \
+    yylloc->first_line = yylloc->last_line;         \
+    yylloc->first_column = yylloc->last_column;     \
+    if (yylloc->last_line == yylineno)              \
+    {                                               \
+        yylloc->first_column = yylloc->last_column; \
+    }                                               \
+    else                                            \
+    {                                               \
+        yylloc->last_line = yylineno;               \
+        yylloc->first_column = yytext + yyleng - strrchr(yytext, '\n'); \
+    }
+
+/*
 #define YY_NO_UNISTD_H
 int yylineno;
 int yycolumn;
-
-#include "nlp.tab.c"
+*/
 #include "nlp.h"
 
 static struct nlp_t *_wc;
@@ -46,18 +59,11 @@ FC2		{DG}+"."
     return HEAD;
 }
 
-<NAMEL>; {
-#ifdef __DEBUG_LEX__
-    printf("LEX:TERM:<NAMEL>;  %s\n", yytext);
-#endif
-    return TERM;
-}
-
 <NAMEL>{ND}{AD}* {
 #ifdef __DEBUG_LEX__
     printf("LEX:IDENTIFIER:<NAMEL>{ND}{AD}*  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (nlp_add_value_list(_wc) != NLP_NOERR)
@@ -73,7 +79,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:IDENTIFIER:<VNAME>{ND}{AD}*  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, IDENTIFIER, yytext, &yylloc);
@@ -85,7 +91,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:EQ:<VNAME>=  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         _wc->value_state = NLP_VALUE_STATE_INIT;
@@ -99,7 +105,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:LP:<VNAME>(  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, LP, yytext, &yylloc);
@@ -111,7 +117,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:RP:<VNAME>)  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, RP, yytext, &yylloc);
@@ -123,7 +129,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:DOT:<NAMEL>.  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, DOT, yytext, &yylloc);
@@ -135,7 +141,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:LP:<NAMEL>(  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, LP, yytext, &yylloc);
@@ -147,7 +153,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:RP:<NAMEL>)  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, RP, yytext, &yylloc);
@@ -159,7 +165,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:INTEGER:<VNAME>{SN}?{DG}+  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, INTEGER, yytext, &yylloc);
@@ -171,7 +177,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:CM:<VNAME>,  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, CM, yytext, &yylloc);
@@ -183,7 +189,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:CM:<NAMEL>,  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, CM, yytext, &yylloc);
@@ -193,11 +199,16 @@ FC2		{DG}+"."
 
 <INITIAL>[ \t] ;
 <NAMEL>[ \t] ;
+<VNAME>[ \t] ;
 <INITIAL>\n {
     yycolumn = 1;
     yylineno++;
 }
 <NAMEL>\n {
+    yycolumn = 1;
+    yylineno++;
+}
+<VNAME>\n {
     yycolumn = 1;
     yylineno++;
 }
@@ -209,11 +220,13 @@ FC2		{DG}+"."
     BEGIN IFILE;
 }
 <IFILE>[^ \t\n>'\"] {
+    /*
     {
         int c;
         while ((c = input() && c!= '\n'));
     }
     yylineno++;
+    */
 }
 <INITIAL><<EOF>> {
     yyterminate();
@@ -230,17 +243,11 @@ FC2		{DG}+"."
     BEGIN NAMEL;
 }
 <COMMENT>. ;
-<NAMEL>\; {
-#ifdef __DEBUG_LEX__
-    printf("LEX:SM:<NAMEL>;  %s\n", yytext);
-#endif
-    return SM;
-}
 <NAMEL>{SN}?{DG}+ {
 #ifdef __DEBUG_LEX__
     printf("LEX:INTEGER:<NAMEL>{SN}?{DG}+  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -254,7 +261,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:NUMMUL:<NAMEL>{NM}{DG}*\\*  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -268,7 +275,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:MULMUL:<NAMEL>**  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -282,7 +289,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{DG}+{EP}  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -296,7 +303,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC}+  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -310,7 +317,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC}+{EP}  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -324,7 +331,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC2}+  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -338,7 +345,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC2}+{EP}  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -352,7 +359,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:SKIPPER:<NAMEL>@+  %s\n", yytext);
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         nlp_add_value(_wc, SKIPPER, yytext, &yylloc);
@@ -371,7 +378,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:STRING:<DSTR>\n");
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -386,7 +393,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:STRING:<SSTR>\n");
 #endif
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
         if (_wc->value_state == NLP_VALUE_STATE_INIT)
@@ -398,14 +405,14 @@ FC2		{DG}+"."
     return STRING;
 }
 <DSTR>. {
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (nlp_string_append(_wc, yytext[0]))
     {
 
     }
 }
 <SSTR>. {
-    _wc = nlp_get_current_context();
+    _wc = yyget_extra(yyscanner);
     if (nlp_string_append(_wc, yytext[0]))
     {
         

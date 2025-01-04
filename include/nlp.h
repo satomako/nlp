@@ -1,43 +1,44 @@
 #ifndef __NLP_H__
 #define __NLP_H__
 
-#define NLP_MAX_IDENTIFIER_LEN   (127)
-#define NLP_MAX_DIMENSION        (8)
-#define NLP_MAX_MEMBER_DEPTH     (32)
-#define NLP_MAX_VALUE_NEST       (32)
-#define NLP_MAX_STRING_LENGTH    (65536)
-#define NLP_BUFFER_SIZE          (1024)
+#define NLP_MAX_IDENTIFIER_LEN (127)
+#define NLP_MAX_DIMENSION (8)
+#define NLP_MAX_MEMBER_DEPTH (32)
+#define NLP_MAX_VALUE_NEST (32)
+#define NLP_MAX_STRING_LENGTH (65536)
+#define NLP_BUFFER_SIZE (1024)
 
-#define NLP_NOERR                (0) // no error
-#define NLP_ERR_NULL_POINTER     (1) // null pointer
-#define NLP_ERR_NOMEM            (2) // no memory
-#define NLP_ERR_VARIABLE_EXISTS  (3) // variable exists
-#define NLP_ERR_MEMBER_EXISTS    (4) // member exists
-#define NLP_ERR_BAD_ARGUMENT     (5) // bad argument
-#define NLP_ERR_BAD_STATUS       (6) // bad status
+#define NLP_NOERR (0)               // no error
+#define NLP_ERR_NULL_POINTER (1)    // null pointer
+#define NLP_ERR_NOMEM (2)           // no memory
+#define NLP_ERR_VARIABLE_EXISTS (3) // variable exists
+#define NLP_ERR_MEMBER_EXISTS (4)   // member exists
+#define NLP_ERR_BAD_ARGUMENT (5)    // bad argument
+#define NLP_ERR_BAD_STATUS (6)      // bad status
 
-#define NLP_TYPE_INT8            (1)
-#define NLP_TYPE_INT32           (2)
-#define NLP_TYPE_INT64           (3)
-#define NLP_TYPE_REAL32          (4)
-#define NLP_TYPE_REAL64          (5)
-#define NLP_TYPE_FSTRING         (6)
-#define NLP_TYPE_STRUCT          (7)
+#define NLP_TYPE_INT8 (1)
+#define NLP_TYPE_INT32 (2)
+#define NLP_TYPE_INT64 (3)
+#define NLP_TYPE_REAL32 (4)
+#define NLP_TYPE_REAL64 (5)
+#define NLP_TYPE_FSTRING (6)
+#define NLP_TYPE_STRUCT (7)
 
-#define NLP_STRING_TOUPPER       (1<<0)
-#define NLP_STRING_TOLOWER       (1<<1)
-#define NLP_STRING_PAD_SPACE     (1<<2)
+#define NLP_STRING_TOUPPER (1 << 0)
+#define NLP_STRING_TOLOWER (1 << 1)
+#define NLP_STRING_PAD_SPACE (1 << 2)
 
-#define NLP_VALUE_STATE_INIT       (0)
+#define NLP_VALUE_STATE_INIT (0)
 #define NLP_VALUE_STATE_IDENTIFIER (1)
 
-#define NLP_DECODE_STATE_VALUE   (0)
-#define NLP_DECODE_STATE_COMMA   (1)
+#define NLP_DECODE_STATE_VALUE (0)
+#define NLP_DECODE_STATE_COMMA (1)
 
-#define NLP_FALSE                (0)
-#define NLP_TRUE                 (1)
+#define NLP_FALSE (0)
+#define NLP_TRUE (1)
 
-#if ! defined YYLTYPE_IS_DECLARED
+// typedef int YYSTYPE;
+#if !defined YYLTYPE_IS_DECLARED
 typedef struct YYLTYPE YYLTYPE;
 struct YYLTYPE
 {
@@ -48,14 +49,17 @@ struct YYLTYPE
 };
 #define YYLTYPE_IS_DECLARED 1
 #endif
-int yylex();
-void yyerror(const char *);
-//int yywrap();
-void yyerror(const char *str);
+//  int yylex();
+//  typedef void *yyscan_t;
+//  int yylex(YYSTYPE *yylval, YYLTYPE *yylloc, yyscan_t scanner);
+//  void yyerror(const char *);
+//   int yywrap();
+//  void yyerror(const char *str);
 
 /**
  * @brief nlp variable structure
  * @param name variable name
+ * @param struct_name struct name
  * @param type variable type
  * @param size variable size
  * @param padding padding size
@@ -70,7 +74,8 @@ void yyerror(const char *str);
  */
 struct nlp_variable_t
 {
-    char name[NLP_MAX_IDENTIFIER_LEN+1];
+    char name[NLP_MAX_IDENTIFIER_LEN + 1];
+    char struct_name[NLP_MAX_IDENTIFIER_LEN + 1];
     int type;
     int size;
     int padding;
@@ -79,8 +84,8 @@ struct nlp_variable_t
     int min[NLP_MAX_DIMENSION];
     int max[NLP_MAX_DIMENSION];
     int cur[NLP_MAX_DIMENSION];
-    struct nlp_variable_t* next;
-    struct nlp_variable_t* member;
+    struct nlp_variable_t *next;
+    struct nlp_variable_t *member;
     int level;
 };
 
@@ -174,6 +179,7 @@ struct nlp_decode_variable_t
  */
 struct nlp_t
 {
+    yyscan_t scanner;
     struct nlp_variable_list_t variable_list_head;
     struct nlp_decode_variable_t decode_variable;
     struct nlp_value_list_t value_list_head;
@@ -181,25 +187,24 @@ struct nlp_t
     int value_state;
     int opt_dryrun;
     int opt_verbose;
-    char scanning_string[NLP_MAX_STRING_LENGTH+1];
+    char scanning_string[NLP_MAX_STRING_LENGTH + 1];
     int scanning_string_length;
 };
 
 /*
  * nlp.c
-*/
+ */
 int nlp_init(struct nlp_t *c);
 int nlp_set_dryrun(struct nlp_t *c, int option);
-struct nlp_t *nlp_get_current_context();
 int nlp_decode(struct nlp_t *c);
 int nlp_decode_one_variable(struct nlp_t *c, struct nlp_variable_t *var, struct nlp_value_list_t *vl);
 int nlp_decode_set_start_address(struct nlp_t *c, struct nlp_variable_t *var, struct nlp_value_t **val);
 int nlp_decode_dimension(struct nlp_decode_variable_t *dc, struct nlp_value_t **val);
 int nlp_decode_values(struct nlp_decode_variable_t *dc, struct nlp_value_t *val);
 
-/* 
+/*
  * nlp_variable.c
-*/
+ */
 struct nlp_variable_t *nlp_create_variable(char *name, int type, int size, int padding, int dim, int min[], int max[]);
 int nlp_dispose_variable(struct nlp_variable_t *variable);
 int nlp_add_member(struct nlp_variable_t *variable, struct nlp_variable_t *member);
@@ -213,14 +218,14 @@ int nlp_forward_reference(struct nlp_decode_variable_t *v);
 
 /*
  * nlp_value.c
-*/
+ */
 int nlp_value_list_count(struct nlp_t *c);
 struct nlp_value_list_t *nlp_create_value_list();
 int nlp_add_value_list(struct nlp_t *c);
 void nlp_remove_value_list_first(struct nlp_t *c);
 void nlp_free_value_list(struct nlp_t *c);
 void nlp_free_values(struct nlp_value_t *l);
-int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE *yyl);
+int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE **yyl);
 void nlp_string_reset(struct nlp_t *c);
 int nlp_string_append(struct nlp_t *c, char chr);
 
@@ -231,7 +236,7 @@ void _nlp_print_value_list(struct nlp_t *c);
 
 /*
  * nlp_util.c
-*/
+ */
 char *t_strlcpy(char *dst, char *src, int size);
 char *t_strdup(char *src);
 

@@ -1,16 +1,19 @@
 /*
-* nlp_value.c
-* This file is part of nlp.
-* This file handles variable decoding.
-*/
+ * nlp_value.c
+ * This file is part of nlp.
+ * This file handles variable decoding.
+ */
 #include <stdio.h>
 #include <stdlib.h>
+#include "nlp.tab.h"
+#include "nlp.lex.h"
 #include "nlp.h"
 
 void _nlp_dump_values(struct nlp_t *c)
 {
     struct nlp_value_list_t *vl;
-    if (c == NULL) return;
+    if (c == NULL)
+        return;
     for (vl = c->value_list_head.next; vl; vl = vl->next)
     {
         printf("-------------\n");
@@ -74,10 +77,12 @@ int nlp_add_value_list(struct nlp_t *c)
     struct nlp_value_list_t *i;
     struct nlp_value_list_t *vl;
 
-    if (c == NULL) return NLP_ERR_BAD_STATUS;
+    if (c == NULL)
+        return NLP_ERR_BAD_STATUS;
     vl = nlp_create_value_list();
-    if (vl == NULL) return NLP_ERR_NOMEM;
-    for (i = &c->value_list_head; i; i = i ->next)
+    if (vl == NULL)
+        return NLP_ERR_NOMEM;
+    for (i = &c->value_list_head; i; i = i->next)
     {
         if (i->next == NULL)
         {
@@ -98,7 +103,8 @@ void nlp_remove_value_list_first(struct nlp_t *c)
 {
     struct nlp_value_list_t *vl;
 
-    if (c->value_list_head.next == NULL) return;
+    if (c->value_list_head.next == NULL)
+        return;
     vl = c->value_list_head.next;
     c->value_list_head.next = c->value_list_head.next->next;
     nlp_free_values(vl->list_head.next);
@@ -109,7 +115,8 @@ void nlp_free_value_list(struct nlp_t *c)
 {
     struct nlp_value_list_t *i;
 
-    if (c == NULL) return;
+    if (c == NULL)
+        return;
     while (c->value_list_head.next)
     {
         nlp_remove_value_list_first(c);
@@ -126,19 +133,21 @@ void nlp_free_values(struct nlp_value_t *vl)
         j = i->next;
         if (i->value)
         {
-            if (i->value) free(i->value);
+            if (i->value)
+                free(i->value);
         }
         free(i);
         i = j;
     }
 }
 
-int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE *yyl)
+int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE **yyl)
 {
     struct nlp_value_t *i;
     struct nlp_value_t *v;
 
-    if (c == NULL) return NLP_ERR_BAD_ARGUMENT;
+    if (c == NULL)
+        return NLP_ERR_BAD_ARGUMENT;
     for (i = c->current_value_list_head; i; i = i->next)
     {
         if (i->next == NULL)
@@ -148,13 +157,15 @@ int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE *yyl)
     }
 
     v = calloc(1, sizeof(struct nlp_value_t));
-    if (v == NULL) return NLP_ERR_BAD_STATUS;
+    if (v == NULL)
+        return NLP_ERR_BAD_STATUS;
 
     v->value = t_strdup(value);
-    if (v->value == NULL) return NLP_ERR_BAD_STATUS;
+    if (v->value == NULL)
+        return NLP_ERR_BAD_STATUS;
     v->type = vtype;
-    v->first_line = yyl->first_line;
-    v->first_column = yyl->first_column;
+    v->first_line = (*yyl)->first_line;
+    v->first_column = (*yyl)->first_column;
     i->next = v;
     return NLP_NOERR;
 }
