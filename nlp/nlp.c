@@ -14,7 +14,7 @@ typedef void *yyscan_t;
 int _nlp_print_current(struct nlp_decode_variable_t *dc, int opt);
 char *_nlp_type_to_string(int type);
 
-int yywrap()
+int yywrap(yyscan_t scanner)
 {
     return 1;
 }
@@ -32,11 +32,39 @@ int nlp_init(struct nlp_t *c)
 {
     memset(c, 0, sizeof(struct nlp_t));
     yylex_init(&c->scanner);
+    if (c->scanner == NULL)
+    {
+        return NLP_ERR_BAD_STATUS;
+    }
     yyset_extra(c, c->scanner);
+    if (nlp_init_variable_definition(c) != NLP_NOERR)
+    {
+        return NLP_ERR_BAD_STATUS;
+    }
+    c->struct_list_head.next = &c->struct_list_head;
+    c->struct_list_head.prev = &c->struct_list_head;
     c->variable_list_head.next = &c->variable_list_head;
     c->variable_list_head.prev = &c->variable_list_head;
     c->opt_dryrun = 0;
     c->value_state = NLP_VALUE_STATE_INIT;
+    return NLP_NOERR;
+}
+
+int nlp_destroy(struct nlp_t *c)
+{
+    struct nlp_variable_list_t *vl;
+    struct nlp_variable_list_t *vl_next;
+
+    for (vl = c->struct_list_head.next; vl != &c->struct_list_head; vl = vl_next)
+    {
+        vl_next = vl->next;
+        free(vl);
+    }
+    for (vl = c->variable_list_head.next; vl != &c->variable_list_head; vl = vl_next)
+    {
+        vl_next = vl->next;
+        free(vl);
+    }
     return NLP_NOERR;
 }
 

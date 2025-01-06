@@ -6,6 +6,8 @@ typedef c_t {
     int32 D;
 }
 
+ha**@@ge;
+
 type hoge_t HOGE(100);
 
 int32 B(3);

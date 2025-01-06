@@ -3,7 +3,7 @@
 #TESTS      = test_value_value_list.exe
 #TESTS      = test01.exe variable_dump.exe test_value_value_list.exe
 #TESTS      = test01.exe test02.exe test_value_value_list.exe variable_dump.exe
-TESTS      = test02.exe
+TESTS      = test03.exe
 
 CC         = gcc
 LD         = ld

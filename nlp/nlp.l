@@ -1,12 +1,14 @@
-%option noinput nounput noyywrap 8bit nodefault
+%option noinput nounput 8bit nodefault
 %option yylineno
 %option reentrant bison-bridge bison-locations
+%option never-interactive
 
 %{
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <io.h>
+#define YY_NO_UNISTD_H
 #include "nlp.tab.h"
 
 #define YY_USER_ACTION                              \
@@ -22,14 +24,8 @@
         yylloc->first_column = yytext + yyleng - strrchr(yytext, '\n'); \
     }
 
-/*
-#define YY_NO_UNISTD_H
-int yylineno;
-int yycolumn;
-*/
 #include "nlp.h"
 
-static struct nlp_t *_wc;
 %}
 
 ND		[a-zA-Z_]
@@ -41,7 +37,7 @@ EP		[deDE]{SN}?{DG}+
 FC		{DG}*"."{DG}+
 FC2		{DG}+"."
 
-%s NAMEL VNAME SSTR DSTR IFILE COMMENT
+%start NAMEL VNAME SSTR DSTR IFILE COMMENT
 
 %%
 <NAMEL>\/ {
@@ -63,6 +59,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:IDENTIFIER:<NAMEL>{ND}{AD}*  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -79,6 +76,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:IDENTIFIER:<VNAME>{ND}{AD}*  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -91,6 +89,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:EQ:<VNAME>=  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -105,6 +104,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:LP:<VNAME>(  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -117,6 +117,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:RP:<VNAME>)  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -129,6 +130,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:DOT:<NAMEL>.  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -141,6 +143,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:LP:<NAMEL>(  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -153,6 +156,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:RP:<NAMEL>)  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -165,6 +169,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:INTEGER:<VNAME>{SN}?{DG}+  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -177,6 +182,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:CM:<VNAME>,  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -189,6 +195,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:CM:<NAMEL>,  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -247,6 +254,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:INTEGER:<NAMEL>{SN}?{DG}+  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -261,6 +269,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:NUMMUL:<NAMEL>{NM}{DG}*\\*  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -275,6 +284,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:MULMUL:<NAMEL>**  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -289,6 +299,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{DG}+{EP}  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -303,6 +314,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC}+  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -317,6 +329,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC}+{EP}  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -331,6 +344,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC2}+  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -345,6 +359,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:REAL:<NAMEL>{SN}?{FC2}+{EP}  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -359,6 +374,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:SKIPPER:<NAMEL>@+  %s\n", yytext);
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -367,10 +383,14 @@ FC2		{DG}+"."
     return SKIPPER;
 }
 <NAMEL>\" {
+    struct nlp_t *_wc;
+    _wc = yyget_extra(yyscanner);
     nlp_string_reset(_wc);
     BEGIN DSTR;
 }
 <NAMEL>' {
+    struct nlp_t *_wc;
+    _wc = yyget_extra(yyscanner);
     nlp_string_reset(_wc);
     BEGIN SSTR;
 }
@@ -378,6 +398,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:STRING:<DSTR>\n");
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -393,6 +414,7 @@ FC2		{DG}+"."
 #ifdef __DEBUG_LEX__
     printf("LEX:STRING:<SSTR>\n");
 #endif
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (!_wc->opt_dryrun)
     {
@@ -405,6 +427,7 @@ FC2		{DG}+"."
     return STRING;
 }
 <DSTR>. {
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (nlp_string_append(_wc, yytext[0]))
     {
@@ -412,6 +435,7 @@ FC2		{DG}+"."
     }
 }
 <SSTR>. {
+    struct nlp_t *_wc;
     _wc = yyget_extra(yyscanner);
     if (nlp_string_append(_wc, yytext[0]))
     {

@@ -110,3 +110,46 @@ char *t_strlcpy_fix(char *dst, char *src, int size, int opt)
 	}
 	return dst_save;
 }
+
+/**
+ * @brief get file size
+ * @param filename file name
+ * @return file size
+ */
+size_t f_filesize(char *filename)
+{
+	FILE *fp;
+	size_t size;
+
+	fp = fopen(filename, "rb");
+	if (fp == NULL)
+	{
+		return 0;
+	}
+	fseek(fp, 0, SEEK_END);
+	size = ftell(fp);
+	fclose(fp);
+	return size;
+}
+
+/**
+ * @brief read file
+ * @param filename file name
+ * @param buf buffer
+ * @param size buffer size
+ * @return read size
+ */
+int f_readfile(char *filename, char *buf, size_t size)
+{
+	FILE *fp;
+	size_t rsize;
+
+	fp = fopen(filename, "rb");
+	if (fp == NULL)
+	{
+		return 0;
+	}
+	rsize = fread(buf, 1, size, fp);
+	fclose(fp);
+	return rsize;
+}

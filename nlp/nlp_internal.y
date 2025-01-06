@@ -16,22 +16,45 @@
 *   type_definition     : TYPEDEF IDENTIFIER LB variable_definition_list RB
 */
 
-%{
-#include <stdio.h>
-extern char *zztext;
-extern int zzlex();
-extern void zzerror(const char *str);
-%}
-
 %define api.prefix {zz}
+%define api.pure full
 %locations
+%param { yyscan_t scanner }
+
+%code top{
+#include <stdio.h>
+#define ZZDEBUG 1
+union YYSTYPE
+{
+    char *str;
+};
+typedef union YYSTYPE YYSTYPE;
+}
+%code requires {
+    typedef void* yyscan_t;
+}
+%code
+{
+    //extern char *zztext;
+    //extern int zzlex();
+    //extern void zzerror(const char *str);
+    int zzlex(YYSTYPE *yylvalp, YYLTYPE *yyllocp, yyscan_t scanner);
+    void zzerror(YYLTYPE *yyllocp, yyscan_t dummy, const char *message);
+}
+
+%union
+{
+    char *str;
+}
+
 %token INT8 INT32 INT64 REAL32 REAL64 STRING TYPE
 %token TYPEDEF LB RB
 %token IDENTIFIER INTEGER
 %token COLON CM LP RP SM
+%token END
 
 %%
-all                 : definition_list
+all                 : definition_list END
                     {
                         YYACCEPT;
                     }

@@ -37,7 +37,6 @@
 #define NLP_FALSE (0)
 #define NLP_TRUE (1)
 
-// typedef int YYSTYPE;
 #if !defined YYLTYPE_IS_DECLARED
 typedef struct YYLTYPE YYLTYPE;
 struct YYLTYPE
@@ -49,12 +48,18 @@ struct YYLTYPE
 };
 #define YYLTYPE_IS_DECLARED 1
 #endif
-//  int yylex();
-//  typedef void *yyscan_t;
-//  int yylex(YYSTYPE *yylval, YYLTYPE *yylloc, yyscan_t scanner);
-//  void yyerror(const char *);
-//   int yywrap();
-//  void yyerror(const char *str);
+
+#if !defined ZZLTYPE_IS_DECLARED
+typedef struct ZZLTYPE ZZLTYPE;
+struct ZZLTYPE
+{
+    int first_line;
+    int first_column;
+    int last_line;
+    int last_column;
+};
+#define ZZLTYPE_IS_DECLARED 1
+#endif
 
 /**
  * @brief nlp variable structure
@@ -180,6 +185,8 @@ struct nlp_decode_variable_t
 struct nlp_t
 {
     yyscan_t scanner;
+    yyscan_t internal_scanner;
+    struct nlp_variable_list_t struct_list_head;
     struct nlp_variable_list_t variable_list_head;
     struct nlp_decode_variable_t decode_variable;
     struct nlp_value_list_t value_list_head;
@@ -215,6 +222,8 @@ int nlp_add_variable(struct nlp_variable_list_t *variable_list, struct nlp_varia
 struct nlp_variable_t *nlp_find_variable(struct nlp_variable_list_t *variable_list, char *name);
 int nlp_append_variable_list(struct nlp_variable_list_t *variable_list, struct nlp_variable_t *variable);
 int nlp_forward_reference(struct nlp_decode_variable_t *v);
+int nlp_decode_variable_definition_file(struct nlp_t *c, char *filename);
+int nlp_decode_variable_definition(struct nlp_t *c, char *input);
 
 /*
  * nlp_value.c
@@ -235,9 +244,17 @@ void _nlp_print_values(struct nlp_value_t *l);
 void _nlp_print_value_list(struct nlp_t *c);
 
 /*
+ * nlp_variable_definition.c
+ */
+int nlp_init_variable_definition(struct nlp_t *c);
+
+/*
  * nlp_util.c
  */
 char *t_strlcpy(char *dst, char *src, int size);
 char *t_strdup(char *src);
+char *t_strlcpy_fix(char *dst, char *src, int size, int opt);
+size_t f_filesize(char *filename);
+int f_readfile(char *filename, char *buffer, size_t size);
 
 #endif

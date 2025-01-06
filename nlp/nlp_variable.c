@@ -11,6 +11,21 @@
 #include "nlp.lex.h"
 #include "nlp.h"
 
+typedef struct yy_buffer_state *YY_BUFFER_STATE;
+extern YY_BUFFER_STATE zz_scan_string(char *str, yyscan_t scanner);
+extern void zz_delete_buffer(YY_BUFFER_STATE buffer, yyscan_t scanner);
+extern int zzparse(yyscan_t scanner);
+
+int zzwrap()
+{
+    return 1;
+}
+
+void zzerror(const char *str)
+{
+    printf("XXX %s\n", str);
+}
+
 struct nlp_variable_t *nlp_create_variable_from_text(char *text)
 {
     return NULL;
@@ -487,5 +502,32 @@ int nlp_forward_reference(struct nlp_decode_variable_t *v)
         printf(")");
     }
     printf("\n");
+    return 0;
+}
+
+int nlp_decode_variable_definition_file(struct nlp_t *c, char *filename)
+{
+    int ret;
+    size_t size;
+    char *buf;
+    size = f_filesize(filename);
+    buf = malloc(size + 2);
+    if (buf == NULL)
+    {
+        return NLP_ERR_NOMEM;
+    }
+    memset(buf, 0, size + 2);
+    f_readfile(filename, buf, size);
+    ret = nlp_decode_variable_definition(c, buf);
+    free(buf);
+    return ret;
+}
+
+int nlp_decode_variable_definition(struct nlp_t *c, char *input)
+{
+    YY_BUFFER_STATE buffer;
+    buffer = zz_scan_string(input, c->internal_scanner);
+    zzparse(c->internal_scanner);
+    zz_delete_buffer(buffer, c->internal_scanner);
     return 0;
 }

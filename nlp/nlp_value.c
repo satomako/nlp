@@ -111,6 +111,10 @@ void nlp_remove_value_list_first(struct nlp_t *c)
     free(vl);
 }
 
+/**
+ * @brief free value list
+ * @param c pointer of nlp context
+ */
 void nlp_free_value_list(struct nlp_t *c)
 {
     struct nlp_value_list_t *i;
@@ -123,6 +127,10 @@ void nlp_free_value_list(struct nlp_t *c)
     }
 }
 
+/**
+ * @brief free values
+ * @param vl pointer of value list
+ */
 void nlp_free_values(struct nlp_value_t *vl)
 {
     struct nlp_value_t *i;
@@ -141,6 +149,14 @@ void nlp_free_values(struct nlp_value_t *vl)
     }
 }
 
+/**
+ * @brief add value to the value list
+ * @param c pointer of nlp context
+ * @param vtype value type
+ * @param value value
+ * @param yyl pointer of location
+ * @return NLP_NOERR at success, otherwise NLP_ERR_XXX
+ */
 int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE **yyl)
 {
     struct nlp_value_t *i;
@@ -170,12 +186,22 @@ int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE **yyl)
     return NLP_NOERR;
 }
 
+/**
+ * @brief reset scanning string
+ * @param c pointer of nlp context
+ */
 void nlp_string_reset(struct nlp_t *c)
 {
     c->scanning_string[0] = '\0';
     c->scanning_string_length = 0;
 }
 
+/**
+ * @brief append character to scanning string
+ * @param c pointer of nlp context
+ * @param chr character
+ * @return 0 at success, otherwise 1
+ */
 int nlp_string_append(struct nlp_t *c, char chr)
 {
     if (c->scanning_string_length == NLP_MAX_STRING_LENGTH)
