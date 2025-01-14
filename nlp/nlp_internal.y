@@ -35,9 +35,6 @@ typedef union YYSTYPE YYSTYPE;
 }
 %code
 {
-    //extern char *zztext;
-    //extern int zzlex();
-    //extern void zzerror(const char *str);
     int zzlex(YYSTYPE *yylvalp, YYLTYPE *yyllocp, yyscan_t scanner);
     void zzerror(YYLTYPE *yyllocp, yyscan_t dummy, const char *message);
 }

@@ -9,9 +9,10 @@
 // extern void zz_delete_buffer(YY_BUFFER_STATE buffer);
 
 typedef void *yyscan_t;
-#include "nlp.h"
 #define YYSTYPE ZZSTYPE
-#define YYLTYPE ZZLTYPE
+// #define YYLTYPE ZZLTYPE
+#define YY_NO_UNISTD_H
+#include "nlp.h"
 #include "nlp_internal.tab.h"
 #include "nlp_internal.lex.h"
 
@@ -34,11 +35,12 @@ int main(int ac, char *av[])
     struct nlp_t c;
 
     extern int zzdebug;
-    zzdebug = 1;
+    // zzdebug = 1;
     nlp_init(&c);
     nlp_init_variable_definition(&c);
     nlp_decode_variable_definition_file(&c, "data/test.nlp");
     // nlp_decode_variable_definition_file(&c, "data/test_bad.nlp");
     printf("OK\n");
+    _nlp_dump_variable_definition(&c);
     return 0;
 }

@@ -30,8 +30,8 @@ $(LIBRARY): $(OBJS)
 
 nlp.lex.o: nlp.lex.c nlp.h nlp.tab.c
 nlp.tab.o: nlp.tab.c nlp.h
-nlp_internal.lex.o: nlp_internal.lex.c nlp.h nlp_internal.tab.c
-nlp_internal.tab.o: nlp_internal.tab.c nlp.h
+nlp_internal.lex.o: nlp_internal.l nlp.h nlp_internal.tab.c
+nlp_internal.tab.o: nlp_internal.y nlp.h
 nlp_variable.o: nlp_variable.c nlp.h
 nlp_variable_definition.o: nlp_variable_definition.c nlp.h nlp_internal.lex.o
 nlp_value.o: nlp_value.c nlp.h

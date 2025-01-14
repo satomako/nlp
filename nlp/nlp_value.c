@@ -5,6 +5,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
+#define YY_NO_UNISTD_H
 #include "nlp.tab.h"
 #include "nlp.lex.h"
 #include "nlp.h"
@@ -90,7 +91,7 @@ int nlp_add_value_list(struct nlp_t *c)
             break;
         }
     }
-    c->current_value_list_head = &vl->list_head;
+    c->current_value_head = &vl->list_head;
     c->value_state = NLP_VALUE_STATE_IDENTIFIER;
     return NLP_NOERR;
 }
@@ -164,7 +165,7 @@ int nlp_add_value(struct nlp_t *c, int vtype, char *value, struct YYLTYPE **yyl)
 
     if (c == NULL)
         return NLP_ERR_BAD_ARGUMENT;
-    for (i = c->current_value_list_head; i; i = i->next)
+    for (i = c->current_value_head; i; i = i->next)
     {
         if (i->next == NULL)
         {

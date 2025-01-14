@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <string.h>
+#define YY_NO_UNISTD_H
 #include "nlp.tab.h"
 #include "nlp.lex.h"
 #include "nlp.h"

@@ -190,7 +190,8 @@ struct nlp_t
     struct nlp_variable_list_t variable_list_head;
     struct nlp_decode_variable_t decode_variable;
     struct nlp_value_list_t value_list_head;
-    struct nlp_value_t *current_value_list_head;
+    struct nlp_value_t *current_value_head;
+    struct nlp_value_t working_variable_definition_head;
     int value_state;
     int opt_dryrun;
     int opt_verbose;
@@ -247,6 +248,10 @@ void _nlp_print_value_list(struct nlp_t *c);
  * nlp_variable_definition.c
  */
 int nlp_init_variable_definition(struct nlp_t *c);
+int nlp_add_variable_definition_token(struct nlp_t *c, int type, char *value, struct ZZLTYPE **yyl);
+// int nlp_add_variable_definition_token(struct nlp_t *c, int type, char *value, void *yyl);
+int _nlp_dump_variable_definition(struct nlp_t *c);
+int nlp_concrete_decode_variable_definition(struct nlp_t *c);
 
 /*
  * nlp_util.c

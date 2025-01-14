@@ -7,6 +7,7 @@
 #include <string.h>
 
 typedef void *yyscan_t;
+#define YY_NO_UNISTD_H
 #include "nlp.tab.h"
 #include "nlp.lex.h"
 #include "nlp.h"

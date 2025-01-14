@@ -1,5 +1,6 @@
 typedef hoge_t {
     int32 HIGE(1,2:3);
+    real32 MOJA(-10:10,33);
 }
 
 typedef c_t {
